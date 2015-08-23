@@ -1,0 +1,43 @@
+{
+  "engines": {
+    "node": "^0.12.5"
+  },
+  "scripts": {
+    "build:css": "postcss --use postcss-import --use postcss-mixins --use postcss-simple-vars --use postcss-calc --use postcss-nested --use postcss-conditionals --use postcss-for --use postcss-each --use postcss-simple-extend --use autoprefixer --use csswring -o ./dist/style.css scss/style.scss;",
+    "build:js-min": "browserify -e ./js/app-browserify.js -t [babelify --stage 1] | uglifyjs -m -c > ./dist/app-browserify.js",
+    "build": "npm run build:js-min & npm run build:css",
+    "watch:css": "chokidar-cmd -c 'npm run build:css' -t ./scss/",
+    "watch:js": "watchify ./js/app-browserify.js -t [ babelify --stage 1 ] -o ./dist/app-browserify.js -d",
+    "watch": "npm run watch:css & npm run watch:js;",
+    "test": "mocha ./js/test/; echo '----- tests done'",
+    "server": "nodemon --watch . --ext js,jsx heroku-server.js & npm run watch",
+    "start": "npm run n heroku-server.js",
+    "s": "npm run start & npm run watch",
+    "n": "node  --use_strict --harmony --es_staging ",
+    "deploy": "git fetch . master:gh-pages && git push origin --all",
+    "msg": "# ---------------------------------\n# \n# \n# Do either 1 or 2, not both:\n# \n# 1. If you have your global tools installed: _npm run linkup_.\n# 2. If you don't yet have your global tools installed: _npm run setup_.\n# \n# \n# ---------------------------------\n#\n#\n#---- finally start your server with _npm run s_ :-) \"",
+    "setup": "npm run global_installs && npm run linkup",
+    "global_installs": "npm install -g autoprefixer@^5.2.0 babel-runtime@^5.6.5 babel@^5.6.7 babelify@^6.1.1 browserify@^10.2.0 chai@^2.3.0 chokidar-cmd@^1.1.0 csswring@^3.0.5 mocha@^2.2.5 nodemon@^1.3.7 postcss@^4.1.11 postcss-calc@^4.0.1 postcss-cli@^1.3.1 postcss-conditionals@^1.2.0 postcss-each@^0.2.0 postcss-for@^1.0.1 postcss-import@^5.2.2 postcss-mixins@^0.3.0 postcss-nested@^0.3.1 postcss-simple-extend@^0.3.1 postcss-simple-vars@^0.3.0 uglify-js@^2.4.23 uglifyify@^3.0.1 watchify@^3.2.1",
+    "linkup": "npm link autoprefixer babel-runtime babel babelify browserify chai chokidar-cmd csswring mocha nodemon postcss postcss-calc postcss-cli postcss-conditionals postcss-each postcss-for postcss-import postcss-mixins postcss-nested postcss-simple-extend postcss-simple-vars uglify-js uglifyify watchify",
+    "bower": "bower install normalize-css pace typeplate-starter-kit --save;",
+    "ignores": "echo 'node_modules' > .gitignore;"
+  },
+  "dependencies": {
+    "babel": "^5.6.7",
+    "babel-core": "^5.7.3",
+    "babel-runtime": "^5.6.5",
+    "backbone": "^1.2.1",
+    "csurf": "^1.8.3",
+    "express": "^4.12.3",
+    "express-session": "^1.11.3",
+    "method-override": "^2.3.3",
+    "mithril-resolver": "0.0.10",
+    "node-fetch": "^1.2.1",
+    "request": "^2.55.0",
+    "underscore": "^1.8.3",
+    "whatwg-fetch": "^0.8.2"
+  },
+  "devDependencies": {
+    "codemirror": "^5.5.0"
+  }
+}
