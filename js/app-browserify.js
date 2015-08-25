@@ -1,6 +1,5 @@
 require("babel/polyfill")
 var Babel = require('babel-core')
-let polyfill = require('./polyfill')
 import {container, resolver, m} from 'mithril-resolver'
 let codemirror = require('codemirror')
 let jsmode = require('codemirror/mode/javascript/javascript')
@@ -187,7 +186,8 @@ const channels = {
     codeEdited: chan(),
     logEmitted: chan(),
     codeCleared: chan(),
-    errorOccurred: chan()
+    errorOccurred: chan(),
+    codeAnalyzed: chan()
 }
 
 const computable = fn => {
@@ -212,11 +212,11 @@ let log = (...args) => {
 }
 let reset = () => window.postMessage({type: 'reset'}, parent_url)
 
-// try{}catch(e){}
 ${code}
 `
 
-const iframe_code = m.prop('')
+const iframe_code = m.prop(''),
+    iframe_el = m.prop()
 
 let oldProgram = null
 const analyze = (program) => {
@@ -225,9 +225,7 @@ const analyze = (program) => {
         const result = Babel.transform(prefix_code(program), {stage: 1}),
               {code} = result
 
-        // set iframe src
-        iframe_code(code)
-
+        channels.codeAnalyzed.send(code)
         channels.errorOccurred.send()
         channels.codeCleared.send()
     } catch(e){
@@ -241,6 +239,17 @@ const analyze = (program) => {
 }
 
 channels.codeEdited.to(analyze)
+channels.codeAnalyzed.to((code) => {
+    iframe_code(code)
+    m.redraw()
+})
+
+let reloads = 0
+const frameLoaded = () => {
+    reloads++
+    iframe_el().contentWindow.eval(iframe_code())
+}
+window.frameLoaded = frameLoaded
 
 const TwoPainz = () => m('.grid.grid-2', {config: (e, init) => { if(init) return }}, Code(), Results())
 
@@ -296,16 +305,15 @@ const Results = () => {
     }
 
     const iframe = (elem, init) => {
-        elem.contentWindow.location.reload()
-        requestAnimationFrame(() => elem.contentWindow.eval(iframe_code()))
+        iframe_el(elem)
     }
 
     const getLogs = map(state.logs, (a) => JSON.stringify(a)).join('\n'),
         getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
-    const view = () => m('.right-pane', {config, key: 'results'},
+    const view = () => m('.right-pane', {config},
         // m('textarea', {readonly:true, value:ctrl.getLogs() }),
-        m('iframe', {config: iframe}),
+        m('iframe', {src: './worker.html', key: reloads, onLoad:'frameLoaded();', config: iframe}),
         m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` })
     )
 

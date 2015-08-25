@@ -40,7 +40,7 @@ function startServer() {
 
     // all environments
     app.set('port', process.argv[3] || process.env.PORT || 3000)
-    app.use(express.static(path.join(__dirname, '/dist')))
+    app.use(express.static(path.join(__dirname, 'dist')))
 
     // SOME SECURITY STUFF
     // ----------------------------
