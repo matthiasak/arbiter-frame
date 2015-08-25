@@ -247,7 +247,7 @@ channels.codeAnalyzed.to((code) => {
 let reloads = 0
 const frameLoaded = () => {
     reloads++
-    iframe_el().contentWindow.eval(iframe_code())
+    requestAnimationFrame(() => iframe_el().contentWindow.eval(iframe_code()))
 }
 window.frameLoaded = frameLoaded
 
