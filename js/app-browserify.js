@@ -212,11 +212,8 @@ let log = (...args) => {
 }
 let reset = () => window.postMessage({type: 'reset'}, parent_url)
 
-try{
-    ${code}
-}catch(e){
-    window.postMessage
-}
+// try{}catch(e){}
+${code}
 `
 
 const iframe_code = m.prop('')
@@ -245,7 +242,7 @@ const analyze = (program) => {
 
 channels.codeEdited.to(analyze)
 
-const TwoPainz = () => m('.grid.grid-2', Code(), Results())
+const TwoPainz = () => m('.grid.grid-2', {config: (e, init) => { if(init) return }}, Code(), Results())
 
 const Code = () => {
     const config = (element, isInitialized, context, vdom) => {
@@ -254,7 +251,7 @@ const Code = () => {
             lineNumbers: true,
             lineWrapping: true,
             indentUnit: 4,
-            fixedGutter: false,
+            fixedGutter: true,
             mode: "javascript",
             keyMap: "sublime",
             extraKeys: {
@@ -300,15 +297,13 @@ const Results = () => {
 
     const iframe = (elem, init) => {
         elem.contentWindow.location.reload()
-        requestAnimationFrame(() => {
-            elem.contentWindow.eval(iframe_code())
-        })
+        requestAnimationFrame(() => elem.contentWindow.eval(iframe_code()))
     }
 
     const getLogs = map(state.logs, (a) => JSON.stringify(a)).join('\n'),
         getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
-    const view = () => m('.right-pane', {config},
+    const view = () => m('.right-pane', {config, key: 'results'},
         // m('textarea', {readonly:true, value:ctrl.getLogs() }),
         m('iframe', {config: iframe}),
         m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` })
