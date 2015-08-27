@@ -219,7 +219,7 @@ const log = (...args) => {
         return arg
     })
     each(x, i => {
-        window.top.postMessage(i, window.location.origin)
+        window.parent.addLog(i)
     })
 }
 
@@ -309,10 +309,12 @@ let state = {
     error: ''
 }
 
-const messageReceived = computable((e) => {
-    state.logs.push(e.data)
+const addLog = computable((e) => {
+    state.logs.push(e)
 })
-window.addEventListener('message', messageReceived, false)
+
+window.addLog = addLog
+
 
 const Results = () => {
 
