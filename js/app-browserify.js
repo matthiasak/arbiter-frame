@@ -6,6 +6,17 @@ let jsmode = require('codemirror/mode/javascript/javascript')
 let comment = require('codemirror/addon/comment/comment')
 let sublime = require('codemirror/keymap/sublime')
 
+String.prototype.hashCode = function() {
+    var hash = 0, i, chr, len;
+    if (this.length == 0) return hash;
+    for (i = 0, len = this.length; i < len; i++) {
+        chr   = this.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 const directions = `/* (1) code your JS as normal.
  * (2) parsing and operational errors will be displayed in a popover.
  * (3) CMD+S to share a link to your code.
@@ -200,17 +211,17 @@ const computable = fn => {
 }
 
 const prefix_code = (code) => `
-let parent_url = '${window.location.origin + window.location.pathname}'
-let each = (c, fn) => c.forEach(fn)
-let log = (...args) => {
+const each = (c, fn) => c.forEach(fn)
+const log = (...args) => {
     let x = args.map((arg) => {
-        if(typeof arg === 'function') return arg.toString()
-        if(arg instanceof Object && arg.__proto__ !== Object.prototype) return arg.toString()
+        if(typeof arg === 'function') return JSON.stringify(arg)
+        if(arg instanceof Object && arg.__proto__ !== Object.prototype) return JSON.stringify(arg)
         return arg
     })
-    window.postMessage({ type: 'log', data: x.length > 1 ? x : x[0] }, parent_url)
+    each(x, i => {
+        window.top.postMessage(i, window.location.origin)
+    })
 }
-let reset = () => window.postMessage({type: 'reset'}, parent_url)
 
 ${code}
 `
@@ -244,10 +255,24 @@ channels.codeAnalyzed.to((code) => {
     m.redraw()
 })
 
-let reloads = 0
 const frameLoaded = () => {
-    reloads++
-    requestAnimationFrame(() => iframe_el().contentWindow.eval(iframe_code()))
+    requestAnimationFrame(() => {
+        try {
+            iframe_el().contentWindow.eval(iframe_code())
+        } catch(e) {
+            let {stackFrame, message} = e,
+                x = {stackFrame, message}
+
+            if(typeof e === 'string') x = {message: e}
+
+            if(!x.stackFrame && !x.message){
+                let message = `Error thrown, however the value thrown is not handled as an instance of Error().`
+                x = {message}
+            }
+
+            channels.errorOccurred.send(x)
+        }
+    })
 }
 window.frameLoaded = frameLoaded
 
@@ -284,6 +309,11 @@ let state = {
     error: ''
 }
 
+const messageReceived = computable((e) => {
+    state.logs.push(e.data)
+})
+window.addEventListener('message', messageReceived, false)
+
 const Results = () => {
 
     let clear = computable(() => state.logs = []),
@@ -291,7 +321,7 @@ const Results = () => {
         err = computable(e => state.error = e || '')
 
     const config = (el, init, context, vdom) => {
-        // if(init) return
+        if(init) return
 
         channels.codeCleared.to(clear)
         channels.logEmitted.to(log)
@@ -304,17 +334,21 @@ const Results = () => {
         }
     }
 
-    const iframe = (elem, init) => {
+    const iframe = (elem, init, context) => {
+        if(init) return
+
+        context.retain = true
+
         iframe_el(elem)
     }
 
-    const getLogs = map(state.logs, (a) => JSON.stringify(a)).join('\n'),
+    const getLogs = () => state.logs.join('\n'),
         getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
     const view = () => m('.right-pane', {config},
-        // m('textarea', {readonly:true, value:ctrl.getLogs() }),
-        m('iframe', {src: './worker.html', key: reloads, onLoad:'frameLoaded();', config: iframe}),
-        m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` })
+        m('iframe', {src: './worker.html?hash='+iframe_code().hashCode(), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
+        m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` }),
+        m('textarea', {readonly:true, value: getLogs(), className: `logs ${state.logs.length ? 'active' : ''}` })
     )
 
     return {view}

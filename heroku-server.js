@@ -6,38 +6,40 @@ var cluster = require('cluster'),
     numCPUs = require('os').cpus().length,
     startServer = require("./server.js").startServer
 
-if (cluster.isMaster) {
-    for(var i=0; i<numCPUs; i++){ cluster.fork() }
+startServer()
 
-    cluster.on('online', function(worker){ console.log('Worker ' + worker.process.pid + ' is online') })
+// if (cluster.isMaster) {
+//     for(var i=0; i<numCPUs; i++){ cluster.fork() }
 
-    cluster.on('exit', function(worker, code, signal) {
-        console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal)
-        console.log('Starting a new worker')
-        cluster.fork()
-    })
-} else {
-    startServer()
+//     cluster.on('online', function(worker){ console.log('Worker ' + worker.process.pid + ' is online') })
 
-    process.on('message', function(message) {
-        if(message.type === 'shutdown') {
-            process.exit(0)
-        }
-    })
-}
+//     cluster.on('exit', function(worker, code, signal) {
+//         console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal)
+//         console.log('Starting a new worker')
+//         cluster.fork()
+//     })
+// } else {
+//     startServer()
 
-function restartWorkers() {
-    var wid, workerIds = []
+//     process.on('message', function(message) {
+//         if(message.type === 'shutdown') {
+//             process.exit(0)
+//         }
+//     })
+// }
 
-    for(wid in cluster.workers) {
-        workerIds.push(wid)
-    }
+// function restartWorkers() {
+//     var wid, workerIds = []
 
-    workerIds.forEach(function(wid) {
-        cluster.workers[wid].send({ text: 'shutdown', from: 'master' })
+//     for(wid in cluster.workers) {
+//         workerIds.push(wid)
+//     }
 
-        setTimeout(function() {
-            cluster.workers[wid] && cluster.workers[wid].kill('SIGKILL')
-        }, 5000)
-    })
-}
+//     workerIds.forEach(function(wid) {
+//         cluster.workers[wid].send({ text: 'shutdown', from: 'master' })
+
+//         setTimeout(function() {
+//             cluster.workers[wid] && cluster.workers[wid].kill('SIGKILL')
+//         }, 5000)
+//     })
+// }
