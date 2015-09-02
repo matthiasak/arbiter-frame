@@ -201,6 +201,26 @@ const channels = {
     codeAnalyzed: chan()
 }
 
+// let comps = 0
+// const computable = fn => {
+//     return (...args) => {
+//         if(!comps) m.startComputation()
+//         comps++
+//         let val = fn(...args)
+//         comps--
+//         if(comps <= 0) m.endComputation()
+//         return val
+//     }
+// }
+
+// const computable = fn => {
+//     return (...args) => {
+//         let val = fn(...args)
+//         m.redraw()
+//         return val
+//     }
+// }
+
 const computable = fn => {
     return (...args) => {
         m.startComputation()
@@ -311,18 +331,22 @@ const Code = () => {
 }
 
 let state = {
-    logs: [],
-    error: ''
+    logs: '',
+    logsOn: false,
+    error: '',
+    timeout: null
 }
 
 const addLog = computable((e) => {
-    state.logs.push(e)
+    // logs
+    state.logs += e+'\n'
 })
 window.addLog = addLog
 
-const reset = () => {
-    state.logs = []
-}
+const reset = computable(() => {
+    // console.log(state.logs)
+    state.logs = ''
+})
 window.reset = reset
 
 
@@ -354,13 +378,12 @@ const Results = () => {
         iframe_el(elem)
     }
 
-    const getLogs = () => state.logs.join('\n'),
-        getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
+    const getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
     const view = () => m('.right-pane', {config},
         m('iframe', {src: './worker.html?hash='+(iframe_code().hashCode()), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
         m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` }),
-        m('textarea', {readonly:true, value: getLogs(), className: `logs ${state.logs.length ? 'active' : ''}` })
+        m('textarea', {readonly:true, textContent: state.logs, className: `logs ${state.logs ? 'active' : ''}` })
     )
 
     return {view}
