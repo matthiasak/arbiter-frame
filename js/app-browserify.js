@@ -211,13 +211,14 @@ const computable = fn => {
 }
 
 const prefix_code = (code) => `
+const _log = (arg) => {
+    if(typeof arg === 'function') return arg+''
+    if(arg instanceof Object) return JSON.stringify(arg)
+    return arg
+}
 const each = (c, fn) => c.forEach(fn)
 const log = (...args) => {
-    let x = args.map((arg) => {
-        if(typeof arg === 'function') return JSON.stringify(arg)
-        if(arg instanceof Object && arg.__proto__ !== Object.prototype) return JSON.stringify(arg)
-        return arg
-    })
+    let x = args.map(_log)
     each(x, i => {
         window.parent.addLog(i)
     })
@@ -258,6 +259,7 @@ channels.codeAnalyzed.to((code) => {
 const frameLoaded = () => {
     requestAnimationFrame(() => {
         try {
+            channels.codeCleared.send()
             iframe_el().contentWindow.eval(iframe_code())
         } catch(e) {
             let {stackFrame, message} = e,
@@ -269,10 +271,13 @@ const frameLoaded = () => {
                 let message = `Error thrown, however the value thrown is not handled as an instance of Error().`
                 x = {message}
             }
-
+            // console.log(e)
             channels.errorOccurred.send(x)
         }
     })
+    // setTimeout(() => {
+
+    // }, 0)
 }
 window.frameLoaded = frameLoaded
 
@@ -312,7 +317,6 @@ let state = {
 const addLog = computable((e) => {
     state.logs.push(e)
 })
-
 window.addLog = addLog
 
 
@@ -348,7 +352,7 @@ const Results = () => {
         getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
     const view = () => m('.right-pane', {config},
-        m('iframe', {src: './worker.html?hash='+iframe_code().hashCode(), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
+        m('iframe', {src: './worker.html?hash='+(iframe_code().hashCode()), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
         m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` }),
         m('textarea', {readonly:true, value: getLogs(), className: `logs ${state.logs.length ? 'active' : ''}` })
     )
