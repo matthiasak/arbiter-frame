@@ -331,7 +331,7 @@ const Code = () => {
 }
 
 let state = {
-    logs: '',
+    logs: [],
     logsOn: false,
     error: '',
     timeout: null
@@ -339,13 +339,12 @@ let state = {
 
 const addLog = computable((e) => {
     // logs
-    state.logs += e+'\n'
+    state.logs = [...state.logs, e]
 })
 window.addLog = addLog
 
 const reset = computable(() => {
-    // console.log(state.logs)
-    state.logs = ''
+    state.logs = []
 })
 window.reset = reset
 
@@ -383,7 +382,7 @@ const Results = () => {
     const view = () => m('.right-pane', {config},
         m('iframe', {src: './worker.html?hash='+(iframe_code().hashCode()), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
         m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` }),
-        m('textarea', {readonly:true, textContent: state.logs, className: `logs ${state.logs ? 'active' : ''}` })
+        m('textarea', {readonly:true, value: state.logs.join('\n'), className: `logs ${state.logs.length ? 'active' : ''}` })
     )
 
     return {view}
