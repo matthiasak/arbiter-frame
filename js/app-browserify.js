@@ -216,6 +216,7 @@ const _log = (arg) => {
     if(arg instanceof Object) return JSON.stringify(arg)
     return arg
 }
+const reset = () => window.parent.reset()
 const each = (c, fn) => c.forEach(fn)
 const log = (...args) => {
     let x = args.map(_log)
@@ -318,6 +319,11 @@ const addLog = computable((e) => {
     state.logs.push(e)
 })
 window.addLog = addLog
+
+const reset = () => {
+    state.logs = []
+}
+window.reset = reset
 
 
 const Results = () => {
