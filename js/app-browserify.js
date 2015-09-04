@@ -344,7 +344,7 @@ window.reset = reset
 
 const Results = () => {
 
-    let clear = () => state.logs = [],
+    let clear = computable(() => state.logs = []),
         log = computable((...m) => state.logs = [...state.logs, ...m]),
         err = computable(e => state.error = e || '')
 
