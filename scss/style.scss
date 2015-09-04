@@ -136,13 +136,11 @@ body {
             > *:nth-child(3) {
                 flex: 1;
                 max-height: 0px;
-                opacity: 0;
                 background-color: $gray;
                 color:$green;
                 &.active {
                     max-height: 50%;
                     padding: .5rem;
-                    opacity: 1;
                 }
             }
 

@@ -332,27 +332,22 @@ const Code = () => {
 
 let state = {
     logs: [],
-    logsOn: false,
-    error: '',
-    timeout: null
+    error: ''
 }
 
-const addLog = computable((e) => {
-    // logs
-    state.logs = [...state.logs, e]
-})
+const addLog = (...m) => channels.logEmitted.send(...m)
 window.addLog = addLog
 
-const reset = computable(() => {
-    state.logs = []
-})
+const reset = () => channels.codeCleared.send()
 window.reset = reset
 
 
 const Results = () => {
 
     let clear = computable(() => state.logs = []),
-        log = computable(m => concat(state.logs, m)),
+        log = computable((...m) => {
+            state.logs = [...state.logs, ...m]
+        }),
         err = computable(e => state.error = e || '')
 
     const config = (el, init, context, vdom) => {
