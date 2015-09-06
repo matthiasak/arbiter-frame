@@ -22,14 +22,8 @@ const directions = `/* (1) code your JS as normal.
  * (3) CMD+S to share a link to your code.
  *
  * Other things to note: this tool compiles es7/6 (es2015/2016) into es5, sends it
- * to an iframe (differing from Arbiter in this because I wanted this version to
- * have a DOM; however re-starting an iframe is MUCH more costly), and polyfills
- * most missing functionality. Thus, for built-in AJAX, you can use fetch(), and
- * for built-in Promises you can use the es6 Promise() spec.
- *
- * NOTE: In this version of Arbiter, the 'regeneratorRuntime' was too costly to
- * inject into the page, thus it has been left out and async and generators are
- * __not__ supported.
+ * to an iframe, and polyfills most missing functionality. Thus, for built-in AJAX,
+ * you can use fetch(), and for built-in Promises you can use the es6 Promise() spec.
  *
  * What else works with Arbiter? ... Everything! Arbiter uses babel-core to transpile
  * JavaScript right here, in your browser. You can see the latest and
