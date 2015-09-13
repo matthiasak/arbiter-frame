@@ -1,3 +1,5 @@
+require('babel/register')
+
 var express = require('express'),
     http = require('http'),
     path = require('path'),
@@ -5,20 +7,18 @@ var express = require('express'),
     request = require('request'),
     session = require('express-session'),
     csrf = require('csurf'),
-    override = require('method-override')
+    override = require('method-override'),
+    compression = require('compression')
 
 function startServer() {
 
-    app.use('/', function(req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*")
-        res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
-        res.header('Access-Control-Allow-Headers', 'Content-Type')
-        next()
-    })
-
-    function querify(queryParamsObject){
-        return '?'+Object.keys(queryParamsObject).map(function(val, key){ return val+'='+queryParamsObject[val] }).join('&')
+    function querify(queryParamsObject) {
+        var params = Object.keys(queryParamsObject).map(function(val, key) {
+            return val + '=' + queryParamsObject[val]
+        }).join('&')
+        return params.length === 0 ? '' : '?' + params
     }
+
 
     // adds a new rule to proxy a localUrl -> webUrl
     // i.e. proxify ('/my/server/google', 'http://google.com/')
@@ -40,7 +40,8 @@ function startServer() {
 
     // all environments
     app.set('port', process.argv[3] || process.env.PORT || 3000)
-    app.use(express.static(path.join(__dirname, 'dist')))
+    app.use(compression())
+    app.use(express.static(__dirname+'/dist'))
 
     // SOME SECURITY STUFF
     // ----------------------------
@@ -61,9 +62,17 @@ function startServer() {
     })
     // ---------------------------
 
-    http.createServer(app).listen(app.get('port'), function() {
-        console.log('Express server listening on port ' + app.get('port'))
-    })
+    const throwYourHandsUp = (port=app.get('port')) => {
+        try {
+            http.createServer(app).listen(port, function() {
+                console.log(`Express server listening on port ${port}`)
+            })
+        } catch(e) {
+            app.set('port', port+1)
+            throwYourHandsUp()
+        }
+    }
+    throwYourHandsUp()
 
 }
 

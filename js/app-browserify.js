@@ -272,7 +272,7 @@ channels.codeAnalyzed.to((code) => {
 })
 
 const frameLoaded = () => {
-    requestAnimationFrame(() => {
+    iframe_el().contentWindow.requestAnimationFrame(() => {
         try {
             channels.codeCleared.send()
             iframe_el().contentWindow.eval(iframe_code())
