@@ -63,14 +63,12 @@ function startServer() {
     // ---------------------------
 
     const throwYourHandsUp = (port=app.get('port')) => {
-        try {
-            http.createServer(app).listen(port, function() {
-                console.log(`Express server listening on port ${port}`)
-            })
-        } catch(e) {
+        http.createServer(app).listen(port, () => {
+            console.log(`Express server listening on port ${port}`)
+        }).on('error', e => {
             app.set('port', port+1)
             throwYourHandsUp()
-        }
+        })
     }
     throwYourHandsUp()
 
