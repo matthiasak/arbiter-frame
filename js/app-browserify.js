@@ -254,11 +254,11 @@ const analyze = (program) => {
 
         channels.codeAnalyzed.send(code)
         channels.errorOccurred.send()
-        channels.codeCleared.send()
     } catch(e){
         let {stackFrame, message} = e,
             x = {stackFrame, message}
 
+        channels.codeCleared.send()
         channels.errorOccurred.send(x)
     }
     oldProgram = program.trim()
