@@ -245,9 +245,7 @@ ${code}
 const iframe_code = m.prop(''),
     iframe_el = m.prop()
 
-let oldProgram = null
 const analyze = (program) => {
-    if(oldProgram === program.trim()) return
     try{
         const result = Babel.transform(prefix_code(program), {stage: 1}),
               {code} = result
@@ -261,8 +259,7 @@ const analyze = (program) => {
         channels.codeCleared.send()
         channels.errorOccurred.send(x)
     }
-    oldProgram = program.trim()
-    window.location.hash = `#${escape(oldProgram)}`
+    window.location.hash = `#${escape(program.trim())}`
 }
 
 channels.codeEdited.to(analyze)
