@@ -310,7 +310,7 @@ const Code = () => {
                 "Ctrl-S": urlShortener
             },
             // foldGutter: true,
-            inputStyle: "contenteditable",
+            inputStyle: "textarea", //"contenteditable", --> https://twitter.com/kangax/status/655176453894610945?s=09
             autofocus: false,
             theme: 'material'
         })
