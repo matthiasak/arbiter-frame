@@ -1,10 +1,37 @@
-require("babel/polyfill")
+// es5, 6, and 7 polyfills, powered by babel
+require("babel-polyfill")
+
+// fetch method, returns es6 promises
+// if you uncomment 'universal-utils' below, you can comment out this line
+// require("isomorphic-fetch")
+
+// universal utils: cache, fetch, store, resource, fetcher, router, vdom, etc
+import * as u from 'universal-utils'
+const {mount, m, update, store, container, rAF, debounce, qs, router, fetch:_fetch, channel} = u
+
+// the following line, if uncommented, will enable browserify to push
+// a changed file to you, with source maps (reverse map from compiled
+// code line # to source code line #), in realtime via websockets
+if (module.hot) {
+    module.hot.accept()
+    module.hot.dispose(() => {
+        // app()
+        update()
+    })
+}
+
 var Babel = require('babel-core')
-import {container, resolver, m} from 'mithril-resolver'
-let codemirror = require('codemirror')
-let jsmode = require('codemirror/mode/javascript/javascript')
-let comment = require('codemirror/addon/comment/comment')
-let sublime = require('codemirror/keymap/sublime')
+var presets = [
+        require('babel-preset-es2015'),
+        require('babel-preset-stage-0'),
+        require('babel-preset-react')
+    ]
+
+// import {container, resolver, m} from 'mithril-resolver'
+let codemirror = require('codemirror'),
+    jsmode = require('codemirror/mode/javascript/javascript'),
+    comment = require('codemirror/addon/comment/comment'),
+    sublime = require('codemirror/keymap/sublime')
 
 String.prototype.hashCode = function() {
     var hash = 0, i, chr, len;
@@ -33,9 +60,8 @@ const directions = `/* (1) code your JS as normal.
  * - http://mkeas.org
  * - http://github.com/matthiasak
  * */`
-var program =
-    unescape(window.location.hash.slice(1)) ||
-`${directions}
+
+let program = unescape(window.location.hash.slice(1)) || `${directions}
 
 let canvas = document.createElement('canvas'),
     {body} = document,
@@ -54,29 +80,6 @@ c.fillRect(50,50,20,20)
 `
 
 function prepEnvironment() {
-    // Break out of frames
-
-    // function bust() {
-    //     document.write = "";
-    //     window.top.location = window.self.location;
-    //     setTimeout(function() {
-    //         document.body.innerHTML = ''
-    //     }, 0)
-    //     window.self.onload = function(evt) {
-    //         document.body.innerHTML = ''
-    //     }
-    // }
-
-    // if (window.top !== window.self) {
-    //     try {
-    //         if (window.top.location.host) {} else {
-    //             bust()
-    //         }
-    //     } catch (ex) {
-    //         bust()
-    //     }
-    // }
-
     // Disable Context Menu
     document.oncontextmenu = function() {
         return false
@@ -87,6 +90,7 @@ function prepEnvironment() {
         return false
     }
 }
+prepEnvironment()
 
 const key = 'AIzaSyC70EBqy70L7fzc19pm_CBczzBxOK-JnhU'
 const urlShortener = () => {
@@ -105,8 +109,6 @@ const googleShortener = (longUrl) =>
     ).then((r) => r.json()).then((data) => {
         window.prompt("Copy URL to clipboard:", data.id)
     })
-
-const qs = (sel, el) => (el || document).querySelector(sel)
 
 /**
  * TRANSDUCER stuff
@@ -141,85 +143,43 @@ const concatAll = (cc) => [].concat(...cc)
 const ignores = (c, ignore) => filter(c, (x) => ignore.indexOf(x) === -1)
 const count = (a) => a.length
 
-/**
- * @example
- *
-    let channel = chan()
-    const each = (arr, cb) => arr.forEach(cb)
-
-    // in module A
-    channel.from((_) => {
-        window.addEventListener('mousemove', _ )
-    })
-
-    // in module B
-    channel.to((...args) => {
-        console.log(...args)
-    })
-
-    // in module C
-    channel.send(1,2,3)
- *
- */
-
-
 const prop = (val, onSet) => {
-    if(val && onSet) onSet(val)
-    return (x) => {
+    return function(x){
         if(!arguments.length) return val
         val = x
-        onSet(x, val)
+        onSet instanceof Function && onSet(x, val)
         return val
     }
 }
 
-const chan = () => {
-    const dests = new Set(),
-        pipe = (...args) => {
-            for(var x of dests) x(...args)
-        }
+// const chan = () => {
+//     const dests = new Set(),
+//         pipe = (...args) => {
+//             for(var x of dests) x(...args)
+//         }
 
-    return {
-        from: cb => cb(pipe),
-        to: cb => dests.add(cb),
-        unto: cb => dests.remove(cb),
-        send: (...args) => pipe(...args)
-    }
-}
+//     return {
+//         from: cb => cb(pipe),
+//         to: cb => dests.add(cb),
+//         unto: cb => dests.remove(cb),
+//         send: (...args) => pipe(...args)
+//     }
+// }
 
 const channels = {
-    codeEdited: chan(),
-    logEmitted: chan(),
-    codeCleared: chan(),
-    errorOccurred: chan(),
-    codeAnalyzed: chan()
+    codeEdited: channel(),
+    logEmitted: channel(),
+    codeCleared: channel(),
+    errorOccurred: channel(),
+    codeAnalyzed: channel()
 }
-
-// let comps = 0
-// const computable = fn => {
-//     return (...args) => {
-//         if(!comps) m.startComputation()
-//         comps++
-//         let val = fn(...args)
-//         comps--
-//         if(comps <= 0) m.endComputation()
-//         return val
-//     }
-// }
-
-// const computable = fn => {
-//     return (...args) => {
-//         let val = fn(...args)
-//         m.redraw()
-//         return val
-//     }
-// }
 
 const computable = fn => {
     return (...args) => {
-        m.startComputation()
+        // m.startComputation()
         let val = fn(...args)
-        m.endComputation()
+        update()
+        // m.endComputation()
         return val
     }
 }
@@ -232,6 +192,7 @@ const _log = (arg) => {
 }
 const reset = () => window.parent.reset()
 const each = (c, fn) => c.forEach(fn)
+const assert = (...args) => window.parent.assert(...args)
 const log = (...args) => {
     let x = args.map(_log)
     each(x, i => {
@@ -242,63 +203,90 @@ const log = (...args) => {
 ${code}
 `
 
-const iframe_code = m.prop(''),
-    iframe_el = m.prop()
+const iframe_el = prop()
 
-const analyze = (program) => {
+const analyze = program => {
     try{
-        const result = Babel.transform(prefix_code(program), {stage: 1}),
+        window.location.hash = `#${escape(program.trim())}`
+
+        const result = Babel.transform(prefix_code(program), {presets}),
               {code} = result
 
-        channels.codeAnalyzed.send(code)
-        channels.errorOccurred.send()
+        channels.codeAnalyzed.spawn(function*(put,take) {
+            yield put(code)
+        })
+
+        channels.errorOccurred.spawn(function*(put,take) {
+            yield put(false)
+        })
     } catch(e){
         let {stackFrame, message} = e,
             x = {stackFrame, message}
 
-        channels.codeCleared.send()
-        channels.errorOccurred.send(x)
+        channels.codeCleared.spawn(function*(put,take) {
+            put(true)
+        })
+
+        channels.errorOccurred.spawn(function*(put,take) {
+            put(x)
+        })
     }
-    window.location.hash = `#${escape(program.trim())}`
+
 }
 
-channels.codeEdited.to(analyze)
-channels.codeAnalyzed.to((code) => {
-    iframe_code(code)
-    m.redraw()
+const execCode = //debounce(
+    transpiled => {
+        codeframe.contentWindow.location.reload()
+        channels.codeCleared.spawn(function*(put,take) {
+            put(true)
+        })
+        codeframe.onload = () => {
+            try {
+                iframe_el().contentWindow.eval(transpiled)
+            } catch(e) {
+                let {stackFrame, message} = e,
+                    x = {stackFrame, message}
+
+                if(typeof e === 'string') x = {message: e}
+
+                if(!x.stackFrame && !x.message){
+                    let message = `Error thrown, however the value thrown is not handled as an instance of Error().`
+                    x = {message}
+                }
+
+                channels.errorOccurred.spawn(function*(put,take) { put(x) })
+            }
+        }
+    }
+// , 250)
+
+channels.codeEdited.spawn(function*(put,take) {
+    while(true) {
+        analyze(take()[1])
+        yield
+    }
 })
 
-const frameLoaded = () => {
-    iframe_el().contentWindow.requestAnimationFrame(() => {
-        try {
-            channels.codeCleared.send()
-            iframe_el().contentWindow.eval(iframe_code())
-        } catch(e) {
-            let {stackFrame, message} = e,
-                x = {stackFrame, message}
+channels.codeAnalyzed.spawn(function*(put,take) {
+    while (true){
+        let [status, transpiled] = take()
+        transpiled && execCode(transpiled)
+        yield
+    }
+})
 
-            if(typeof e === 'string') x = {message: e}
+const TwoPainz = () =>
+    m('.grid.grid-2-800', Code, Results)
 
-            if(!x.stackFrame && !x.message){
-                let message = `Error thrown, however the value thrown is not handled as an instance of Error().`
-                x = {message}
-            }
-            // console.log(e)
-            channels.errorOccurred.send(x)
-        }
+let editor = null
+const edit = _ =>
+    channels.codeEdited.spawn(function*(put,take) {
+        put(editor.getValue())
     })
-    // setTimeout(() => {
-
-    // }, 0)
-}
-window.frameLoaded = frameLoaded
-
-const TwoPainz = () => m('.grid.grid-2', {config: (e, init) => { if(init) return }}, Code(), Results())
 
 const Code = () => {
-    const config = (element, isInitialized, context, vdom) => {
-        if(isInitialized) return
-        context.editor = codemirror.fromTextArea(element, {
+    const config = el => {
+        editor = codemirror.fromTextArea(el, {
             lineNumbers: true,
             lineWrapping: true,
             indentUnit: 4,
@@ -310,15 +298,15 @@ const Code = () => {
                 "Ctrl-S": urlShortener
             },
             // foldGutter: true,
-            inputStyle: "textarea", //"contenteditable", --> https://twitter.com/kangax/status/655176453894610945?s=09
-            autofocus: false,
+            inputStyle: "textarea",
+            autofocus: true,
             theme: 'material'
         })
-        context.editor.on('change', () => channels.codeEdited.send( context.editor.getValue() ))
-        requestAnimationFrame(_ => channels.codeEdited.send(context.editor.getValue()) )
+        editor.on('change', edit)
+        rAF(_ => edit)
     }
 
-    return m('div', m('textarea', {config}, program))
+    return m('div', {shouldUpdate: () => 0}, m('textarea', {config}, program))
 }
 
 let state = {
@@ -326,53 +314,62 @@ let state = {
     error: ''
 }
 
-const addLog = (...m) => channels.logEmitted.send(...m)
-window.addLog = addLog
+const addLog = window.addLog = (...m) =>
+    channels.logEmitted.spawn(function*(put,take) {
+        put(m)
+    })
 
-const reset = () => channels.codeCleared.send()
-window.reset = reset
+const reset = window.reset = () =>
+    channels.codeCleared.spawn(function*(put,take) {
+        put(true)
+    })
 
+let clear = computable(() => state.logs = []),
+    log = computable((...m) => state.logs = [...state.logs, ...m]),
+    err = computable(e => state.error = e || '')
+
+channels.codeCleared.spawn(function*(put, take) {
+    while(true){
+        take()
+        clear()
+        yield
+    }
+})
+
+channels.logEmitted.spawn(function*(put, take) {
+    while(true){
+        let [s, val] = take()
+        val && log(...val)
+        yield
+    }
+})
+
+channels.errorOccurred.spawn(function*(put, take) {
+    while(true){
+        err(take()[1])
+        yield
+    }
+})
 
 const Results = () => {
+    const iframe = el => iframe_el(el) && edit()
 
-    let clear = computable(() => state.logs = []),
-        log = computable((...m) => state.logs = [...state.logs, ...m]),
-        err = computable(e => state.error = e || '')
+    const getError = () =>
+        state.error &&
+        `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
 
-    const config = (el, init, context, vdom) => {
-        if(init) return
+    return m('.right-pane',
+            m('iframe#codeframe',
+                {src: './worker.html', config: iframe, shouldUpdate: _ => false}),
+            m(`textarea.errors${state.error ? '.active' : ''}`,
+                {readonly:true, value: getError() }),
+            m(`textarea.logs${state.logs.length ? '.active' : ''}`,
+                {readonly:true, value: state.logs.join('\n') }))
 
-        channels.codeCleared.to(clear)
-        channels.logEmitted.to(log)
-        channels.errorOccurred.to(err)
-
-        context.onunload = () => {
-            channels.codeCleared.unto(clear)
-            channels.logEmitted.unto(log)
-            channels.errorOccurred.unto(err)
-        }
-    }
-
-    const iframe = (elem, init, context) => {
-        if(init) return
-
-        context.retain = true
-
-        iframe_el(elem)
-    }
-
-    const getError = () => state.error && `${state.error}\n---------\n${state.error.codeFrame || state.error.message}`
-
-    const view = () => m('.right-pane', {config},
-        m('iframe', {src: './worker.html?hash='+(iframe_code().hashCode()), /*key: reloads,*/ onLoad:'frameLoaded();', config: iframe}),
-        m('textarea', {readonly:true, value: getError(), className: `errors ${state.error ? 'active' : ''}` }),
-        m('textarea', {readonly:true, value: state.logs.join('\n'), className: `logs ${state.logs.length ? 'active' : ''}` })
-    )
-
-    return {view}
 }
 
-window.onload = function(){
-    prepEnvironment()
-    m.mount(qs('.container'), {view: TwoPainz})
+const app = () => {
+    mount(TwoPainz, qs('.container'))
 }
+
+app()

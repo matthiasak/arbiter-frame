@@ -1,0 +1,11 @@
+{
+    "source": "./js",
+    "destination": "./dist/esdoc",
+    "plugins": [{
+        "name": "esdoc-es7-plugin"
+    }],
+    "test": {
+        "type": "ava",
+        "source": "./js/test/"
+    }
+}

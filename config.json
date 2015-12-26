@@ -1,0 +1,8 @@
+{
+    "serverRender": false,
+    "apis": {
+
+    },
+    "nodeCluster": false,
+    "appName": "destination.codes"
+}

@@ -1,15 +1,15 @@
-@import "../bower_components/normalize-css/normalize.css";
-@import "../bower_components/typeplate-starter-kit/css/typeplate.css";
-@import "../node_modules/codemirror/lib/codemirror.css";
-@import "../node_modules/codemirror/addon/fold/foldgutter.css";
-@import "../node_modules/codemirror/theme/material.css";
+@import "../bower_components/normalize-scss/_normalize.scss";
+@import "../bower_components/typeplate-starter-kit/scss/_typeplate.scss";
+@import "../node_modules/codemirror/lib/codemirror.scss";
+@import "../node_modules/codemirror/addon/fold/foldgutter.scss";
+@import "../node_modules/codemirror/theme/material.scss";
 
 /* latin-ext */
 @font-face {
   font-family: 'Ubuntu Mono';
   font-style: normal;
   font-weight: 400;
-  src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(http://fonts.gstatic.com/s/ubuntumono/v6/ViZhet7Ak-LRXZMXzuAfkaE8kM4xWR1_1bYURRojRGc.woff2) format('woff2');
+  src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(https://fonts.gstatic.com/s/ubuntumono/v6/ViZhet7Ak-LRXZMXzuAfkaE8kM4xWR1_1bYURRojRGc.woff2) format('woff2');
   unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
@@ -17,7 +17,7 @@
   font-family: 'Ubuntu Mono';
   font-style: normal;
   font-weight: 400;
-  src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(http://fonts.gstatic.com/s/ubuntumono/v6/ViZhet7Ak-LRXZMXzuAfkYgp9Q8gbYrhqGlRav_IXfk.woff2) format('woff2');
+  src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(https://fonts.gstatic.com/s/ubuntumono/v6/ViZhet7Ak-LRXZMXzuAfkYgp9Q8gbYrhqGlRav_IXfk.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 
@@ -50,35 +50,33 @@
     }
 }
 
-@define-mixin grid_r $col, $width {
-    @media only screen and (min-width: $(width)px) {
-        .grid-$(col)-$(width) {
+@mixin grid_r($col, $width) {
+    @media only screen and (min-width: #{$width}px) {
+        .grid-#{$col}-#{$width} {
             & > * {
-                flex-basis: calc(100 / $col)%;
+                flex-basis: #{100 / $col}%;
             }
-            @mixin-content;
         }
     }
 }
 
-@define-mixin grid $col {
-    .grid-$(col) {
+@mixin grid($col) {
+    .grid-#{$col} {
         & > * {
-            flex-basis: calc(100 / $col)%;
+            flex-basis: #{100 / $col}%;
         }
-        @mixin-content;
     }
 }
 
-@mixin grid 2 {}
-@mixin grid 4 {}
-@mixin grid 6 {}
+@include grid(2);
+@include grid(4);
+@include grid(6);
 
-@mixin grid_r 2, 400 {}
-@mixin grid_r 2, 800 {}
+@include grid_r(2, 400);
+@include grid_r(2, 800);
 
-@mixin grid_r 4, 400 {}
-@mixin grid_r 4, 800 {}
+@include grid_r(4, 400);
+@include grid_r(4, 800);
 
 img {
     max-width: 100%;
@@ -174,5 +172,12 @@ body {
     }
     span {
         vertical-align: middle;
+    }
+}
+
+.right-pane {
+    min-height: 100vh;
+    textarea {
+        min-height: 25vh;
     }
 }

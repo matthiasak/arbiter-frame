@@ -1,77 +1,38 @@
-require('babel/register')
+require('babel-core/register')
 
-var express = require('express'),
+var app = require('./express-instance'),
+    app2 = require('express')(),
     http = require('http'),
-    path = require('path'),
-    app = express(),
-    request = require('request'),
-    session = require('express-session'),
-    csrf = require('csurf'),
-    override = require('method-override'),
-    compression = require('compression')
+    // http2 = require('http2')
+    https = require('https'),
+    config = require('./config.json'),
+    appName = config.appName || '',
+    root = config.sslroot || `/etc/letsencrypt/live/`,
+    certfolder = `${root}${appName}`,
+    keyname = config.keyname || 'privkey.pem',
+    certname = config.certname || 'fullchain.pem',
+    fs = require('fs')
 
-function startServer() {
-
-    function querify(queryParamsObject) {
-        var params = Object.keys(queryParamsObject).map(function(val, key) {
-            return val + '=' + queryParamsObject[val]
-        }).join('&')
-        return params.length === 0 ? '' : '?' + params
-    }
-
-
-    // adds a new rule to proxy a localUrl -> webUrl
-    // i.e. proxify ('/my/server/google', 'http://google.com/')
-    function proxify(localUrl, webUrl){
-        app.get(localUrl, (req, res) => {
-            var tokens = webUrl.match(/:(\w+)/ig)
-            var remote = (tokens || []).reduce((a, t) => {
-                return a.replace(new RegExp(t, 'ig'), req.params[t.substr(1)])
-            }, webUrl)
-            req.pipe( request(remote + querify(req.query)) ).pipe(res)
-        })
-    }
-
-    // add your proxies here.
-    //
-    // examples:
-    // proxify('/yummly/recipes', 'http://api.yummly.com/v1/api/recipes');
-    // proxify('/brewery/styles', 'https://api.brewerydb.com/v2/styles');
-
-    // all environments
-    app.set('port', process.argv[3] || process.env.PORT || 3000)
-    app.use(compression())
-    app.use(express.static(__dirname+'/dist'))
-
-    // SOME SECURITY STUFF
-    // ----------------------------
-    // more info: https://speakerdeck.com/ckarande/top-overlooked-security-threats-to-node-dot-js-web-applications
-    // ----
-    // remove some info so we don't divulge to potential
-    // attackers what platform runs the website
-    app.disable('x-powered-by')
-    // change the generic session cookie name
-    app.use(session({ secret: 'some secret', key: 'sessionId', cookie: {httpOnly: true, secure: true} }))
-    // enable overriding
-    app.use(override("X-HTTP-Method-Override"))
-    // enable CSRF protection
-    app.use(csrf())
-    app.use((req, res, next) => {
-        res.locals.csrftoken = req.csrfToken() // send the token to the browser app
-        next()
+try {
+    https.createServer({
+        key: fs.readFileSync(`${certfolder}/${keyname}`),
+        cert: fs.readFileSync(`${certfolder}/${certname}`)
+    }, app).listen(443, () => {
+        console.log(`HTTPS Express server listening on port 443`)
     })
-    // ---------------------------
 
-    const throwYourHandsUp = (port=app.get('port')) => {
-        http.createServer(app).listen(port, () => {
-            console.log(`Express server listening on port ${port}`)
-        }).on('error', e => {
-            app.set('port', port+1)
-            throwYourHandsUp()
-        })
-    }
-    throwYourHandsUp()
-
+    app2.use('*', (req,res) => res.redirect('https://'+req.hostname+req.url))
+    http.createServer(app2).listen(80, () => {
+        console.log(`HTTP Express server listening on port 80`)
+    })
+} catch(e) {
+    console.log('--------------------------------------------')
+    console.log(e)
+    console.log('--------------------------------------------')
+    // likely the certs didn't exist, because we aren't on a deployed server
+    http.createServer(app).listen(app.get('port'), () => {
+        console.log(`HTTP Express server listening on port ${app.get('port')}`)
+    })
 }
 
-module.exports.startServer = startServer
+process.title = 'nodejs - http listener'

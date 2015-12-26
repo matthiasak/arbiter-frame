@@ -1,43 +1,118 @@
 {
+  "name": "arbiter-frame",
+  "version": "1.4.3",
+  "description": "This is a Node/Browserify/Babel/Backbone/React/etc boilerplate. To be used as an initial scaffolding tool.",
+  "author": "Matthew Keas <matthiasak@gmail.com>",
+  "license": "MIT",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthiasak/universal-js-boilerplate.git"
+  },
+  "browserify": {
+    "transform": [
+      "babelify",
+      "envify"
+    ]
+  },
+  "//": [
+    "https://docs.npmjs.com/misc/scripts <-- more about npm scripts"
+  ],
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-0",
+      "react"
+    ],
+    "ignore": "node_modules"
+  },
   "engines": {
-    "node": "^0.12.5"
+    "node": ">=5.3.0 <6"
+  },
+  "config": {
+    "squash_reset": "HEAD~1",
+    "squash_msg": "'squashing commits down to 1 commit'"
   },
   "scripts": {
-    "build:css": "postcss --use postcss-import --use postcss-mixins --use postcss-simple-vars --use postcss-calc --use postcss-nested --use postcss-conditionals --use postcss-for --use postcss-each --use postcss-simple-extend --use autoprefixer --use csswring -o ./dist/style.css scss/style.scss;",
-    "build:js": "browserify -e ./js/app-browserify.js -t [babelify --stage 0] -v | uglifyjs -m -c > ./dist/app-browserify.js",
-    "build": "npm run build:js & npm run build:css",
+    "build:css": "node-sass scss/style.scss | postcss --use autoprefixer --autoprefixer.browsers '> 50%' --use csswring -o ./dist/style.css",
+    "build:js": "browserify -e ./js/app-browserify.js > ./dist/app-browserify.js; browserify -e ./js/polyfill.js > ./dist/polyfill.js",
+    "build": "npm-run-all --parallel build:*; echo \"all done!\";",
     "watch:css": "npm run build:css; sane 'npm run build:css' ./scss --glob='**/*.css' --glob='**/*.scss'",
-    "watch:js": "watchify ./js/app-browserify.js -t [babelify --stage 0] -v --delay 16 -o './dist/app-browserify.js'",
-    "watch": "npm run watch:css & npm run watch:js;",
-    "test": "mocha ./js/test/; echo '----- tests done'",
-    "server": "nodemon --watch . --ext js,jsx heroku-server.js & npm run watch",
-    "start": "npm run n heroku-server.js",
-    "s": "npm run start & npm run watch",
-    "n": "node  --use_strict --harmony --es_staging",
-    "msg": "# ---------------------------------\n# \n# \n# Do either 1 or 2, not both:\n# \n# 1. If you have your global tools already installed from a prior project with this boilerplate (babel, postcss, etc): _npm run linkup_.\n# 2. If you don't yet run this, run it once and don't run it again: _npm run setup_.\n# \n# \n# ---------------------------------\n#\n#\n#---- finally start your server with _npm run s_ :-) \"",
-    "setup": "npm run global_installs && npm run linkup",
-    "global_installs": "npm install -g watchify@^3.4.0 autoprefixer@^5.2.0 bower@^1.4.1 babelify@^6.1.1 browserify@^10.2.0 chai@^2.3.0 csswring@^3.0.5 mocha@^2.2.5 nodemon@^1.3.7 postcss@^4.1.11 postcss-calc@^4.0.1 postcss-cli@^1.3.1 postcss-conditionals@^1.2.0 postcss-each@^0.2.0 postcss-for@^1.0.1 postcss-import@^5.2.2 postcss-mixins@^0.3.0 postcss-nested@^0.3.1 postcss-simple-extend@^0.3.1 postcss-simple-vars@^0.3.0 uglify-js@^2.4.23 sane@^1.2.0",
-    "linkup": "npm link watchify autoprefixer babelify browserify chai csswring mocha nodemon postcss postcss-calc postcss-cli postcss-conditionals postcss-each postcss-for postcss-import postcss-mixins postcss-nested postcss-simple-extend postcss-simple-vars uglify-js sane; npm run bower;",
-    "bower": "bower install normalize-css pace typeplate-starter-kit --save;"
+    "watch:js": "watchify ./js/app-browserify.js -p browserify-hmr -v --delay 16 -o 'exorcist ./dist/app-browserify.js.map > ./dist/app-browserify.js' -d --; watchify ./js/polyfill.js -v --delay 16 -o 'exorcist ./dist/polyfill.js.map > ./dist/polyfill.js' -d --;",
+    "watch": "[ \"$NODE_ENV\" != production ] && npm-run-all --parallel watch:*; echo 'watching started, if not in production';",
+    "test": "ava js/test/main.js",
+    "nodemon_task": "nodemon --watch . --ext js,jsx --ignore dist app.js",
+    "nodemon": "npm-run-all --parallel nodemon_task watch",
+    "server": "forever app.js",
+    "start": "npm-run-all --parallel server build watch",
+    "bower": "bower install normalize-scss typeplate-starter-kit pace; cp ./node_modules/codemirror/lib/codemirror.css ./node_modules/codemirror/lib/codemirror.scss; cp ./node_modules/codemirror/addon/fold/foldgutter.css ./node_modules/codemirror/addon/fold/foldgutter.scss; cp ./node_modules/codemirror/theme/material.css ./node_modules/codemirror/theme/material.scss; echo 'bower dependencies installed';",
+    "postinstall": "npm-run-all bower production-setup",
+    "production-setup": "npm-run-all build; echo 'built for deployment';",
+    "docs": "esdoc -c esdoc.json",
+    "docs:surge": "npm-run-all docs; surge dist/esdoc;",
+    "docs:gh-pages": "git add --all . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all docs; git subtree split --prefix dist -b gh-pages && git checkout gh-pages && cp -rf ./dist/esdoc/* . && git add ast class css file identifiers.html index.html script variable badge.svg coverage.json dump.json function image package.json source.html && git commit -am 'cleaning and pushing' && git push origin gh-pages:gh-pages --force; git checkout master; git branch -Dq gh-pages; echo 'done';",
+    "publish:gh-pages": "git add . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all build:* && git subtree split --prefix dist -b autobuilder && git checkout autobuilder && cp dist/app-browserify.js . && cp dist/style.css . && git add app-browserify.js style.css && git commit -am 'cleaning and pushing' && git push origin autobuilder:gh-pages --force; git checkout master; git branch -Dq autobuilder; echo 'done';",
+    "publish:surge": "npm-run-all build:*; rm -rf dist/esdoc; surge dist; echo 'done';",
+    "teardown": "surge list; echo 'type a domain from above: \n ------------ \n\n '; surge teardown",
+    "clean:subtrees": "git reflog expire --all --expire-unreachable=0; git repack -A -d; git prune; git gc;",
+    "upgrade:brew": "brew update && brew upgrade",
+    "check": "nsp check; echo 'check completed';",
+    "dedupe": "npm dedupe",
+    "deps": "browserify --list; browserify --deps;",
+    "squash": "git reset $npm_package_config_squash_reset; git add .; git commit -am $npm_package_config_squash_msg; git push origin HEAD --force;",
+    "squash:reset": "npm run squash --squash_reset:universal-js-boilerplate=--",
+    "amend": "git commit --amend -m --",
+    "logs:heroku": "heroku logs --tail",
+    "otto:setup": "npm i; otto compile; otto dev; git add --all .; otto dev ssh; echo '--- now follow any error messages when running to fix any binaries while inside the VM (i.e. _npm rebuild node-sass_ may be suggested by  the prompt when you attempt to _npm start_)';",
+    "otto:deploy": "otto build; otto infra; otto deploy;",
+    "otto:teardown": "otto deploy destroy; otto infra destroy; otto dev destroy;",
+    "otto:open": "open `otto dev address`"
   },
   "dependencies": {
-    "babel": "^5.6.7",
-    "babel-core": "^5.7.3",
-    "babel-runtime": "^5.6.5",
+    "autoprefixer": "^6.0.3",
+    "babel-cli": "^6.2.0",
+    "babel-core": "^6.2.0",
+    "babel-polyfill": "^6.2.0",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-react": "^6.1.18",
+    "babel-preset-stage-0": "^6.1.18",
+    "babelify": "^7.2.0",
     "backbone": "^1.2.1",
+    "body-parser": "^1.14.1",
+    "bower": "^1.4.1",
+    "browserify": "^12.0.1",
     "compression": "^1.5.2",
-    "core-js": "^1.1.1",
+    "csswring": "^4.0.0",
     "csurf": "^1.8.3",
+    "envify": "^3.4.0",
     "express": "^4.12.3",
     "express-session": "^1.11.3",
+    "forever": "^0.15.1",
+    "isomorphic-fetch": "^2.2.0",
+    "jquery": "^2.1.4",
+    "lodash": "^3.10.1",
     "method-override": "^2.3.3",
-    "mithril-resolver": "0.0.10",
-    "node-fetch": "^1.2.1",
+    "nanny": "^1.0.1",
+    "nlp_compromise": "^1.1.4",
+    "node-sass": "^3.4.1",
+    "npm-run-all": "^1.2.12",
+    "postcss-cli": "^2.1.0",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
     "request": "^2.55.0",
-    "underscore": "^1.8.3",
-    "whatwg-fetch": "^0.8.2"
+    "sane": "^1.3.0",
+    "universal-utils": "^0.1.17"
   },
   "devDependencies": {
+    "ava": "^0.8.0",
+    "browserify-hmr": "^0.3.1",
+    "esdoc": "^0.4.0",
+    "esdoc-es7-plugin": "^0.0.3",
+    "exorcist": "^0.4.0",
+    "nodemon": "^1.3.7",
+    "nsp": "^2.0.0",
+    "surge": "^0.17.2",
+    "watchify": "^3.4.0",
     "codemirror": "^5.5.0"
   }
 }

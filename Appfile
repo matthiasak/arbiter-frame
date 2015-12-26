@@ -1,0 +1,23 @@
+application {
+    name = "destination-code"
+    type = "node"
+}
+
+customization "node" {
+    node_version = "5.3.0"
+}
+
+project {
+    name = "destination-code"
+    infrastructure = "prod"
+}
+
+# "vpc-public-private"
+infrastructure "prod" {
+    type = "aws"
+    flavor = "simple"
+}
+
+# customization "deploy" {
+#    terraform = "./terraform"
+# }
