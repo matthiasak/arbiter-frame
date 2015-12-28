@@ -12,6 +12,7 @@ node_modules
 dist/app-browserify.js
 dist/app-browserify.js.map
 dist/polyfill.js
+dist/serviceworker.js
 dist/style.css
 dist/esdoc
 bower_components
