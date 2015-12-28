@@ -190,9 +190,34 @@ const _log = (arg) => {
     if(arg instanceof Object) return JSON.stringify(arg)
     return arg
 }
+
+const range = (min, max) =>
+    min + Math.round(Math.random() + (max-min))
+
 const reset = () => window.parent.reset()
+
 const each = (c, fn) => c.forEach(fn)
+
 const assert = (...args) => window.parent.assert(...args)
+
+// https://wzrd.in/standalone/semver
+// https://npmcdn.com/semver
+
+const r = (semver, url='https://wzrd.in/standalone/') =>
+    ((localStorage && url in localStorage) ?
+        new Promise((res,rej) => res(localStorage[url+semver])) :
+        fetch(url+semver).then(x => x.text()).then(x => localStorage[url+semver] = x))
+        .then(x => eval(x))
+        .catch((e) => log(e+' --- '+url+semver))
+
+const require = (...libs) =>
+    Promise.all(libs.map(l =>
+        r(l)))
+
+const clearAll = () =>
+    Object.keys(localStorage).map(x =>
+        localStorage.clear(x))
+
 const log = (...args) => {
     let x = args.map(_log)
     each(x, i => {
