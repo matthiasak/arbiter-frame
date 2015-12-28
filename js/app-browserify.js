@@ -56,6 +56,19 @@ const directions = `/* (1) code your JS as normal.
  * JavaScript right here, in your browser. You can see the latest and
  * greatest Babel features at https://babeljs.io/docs/learn-es2015/.
  *
+ * require() any package like so:
+ *
+ * --------
+ * require('react', 'lodash').then() => // load multiple libs, too!
+ *     let React = react
+ *     // ... use React as normal
+ * )
+ *
+ * or require any specific version with semver:
+ * require('lodash@^3.0.1')
+ * require('react@0.14.1')
+ * --------
+ *
  * Built with love by @matthiasak
  * - http://mkeas.org
  * - http://github.com/matthiasak
