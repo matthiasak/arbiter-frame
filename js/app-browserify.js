@@ -204,7 +204,7 @@ const assert = (...args) => window.parent.assert(...args)
 // https://npmcdn.com/semver
 
 const r = (semver, url='https://wzrd.in/standalone/') =>
-    ((localStorage && url in localStorage) ?
+    ((localStorage && (url+semver) in localStorage) ?
         new Promise((res,rej) => res(localStorage[url+semver])) :
         fetch(url+semver).then(x => x.text()).then(x => localStorage[url+semver] = x))
         .then(x => eval(x))
