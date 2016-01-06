@@ -216,7 +216,7 @@ const _log = (arg) => {
 }
 
 const range = (min, max) =>
-    min + Math.round(Math.random() + (max-min))
+    min + Math.round(Math.random() * (max-min))
 
 const reset = () => window.parent.reset()
 
