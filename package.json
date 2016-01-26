@@ -53,7 +53,7 @@
     "postinstall": "npm-run-all bower transpile-once babylon js-once",
     "docs": "esdoc -c esdoc.json",
     "docs:surge": "npm-run-all docs; surge dist/esdoc;",
-    "publish:gh-pages": "git add . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all postinstall && git subtree split --prefix dist -b autobuilder && git checkout autobuilder && cp dist/app.js . && cp dist/style.css . && git add app.js style.css && git commit -am 'cleaning and pushing' && git push origin autobuilder:gh-pages --force; git checkout master; git branch -Dq autobuilder; echo 'done';",
+    "publish:gh-pages": "git add . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all postinstall && git subtree split --prefix dist -b autobuilder && git checkout autobuilder && cp dist/app.js . && cp dist/serviceworker.js . && cp dist/polyfill.js . && cp dist/style.css . && git add app.js serviceworker.js polyfill.js style.css && git commit -am 'cleaning and pushing' && git push origin autobuilder:gh-pages --force; git checkout master; git branch -Dq autobuilder; echo 'done';",
     "publish:surge": "npm-run-all build:*; rm -rf dist/esdoc; surge dist; echo 'done';",
     "teardown": "surge list; echo 'type a domain from above: \n ------------ \n\n '; surge teardown",
     "clean:subtrees": "git reflog expire --all --expire-unreachable=0; git repack -A -d; git prune; git gc;",
