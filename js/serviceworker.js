@@ -1,7 +1,7 @@
 var CACHE_NAME = 'arbiter'
     // The files we want to cache
 var urlsToCache = [
-    // '/',
+    '/',
     './index.html',
     './style.css',
     './app.js',
