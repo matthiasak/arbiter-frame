@@ -1,8 +1,5 @@
 {
     "serverRender": false,
-    "apis": {
-
-    },
-    "nodeCluster": false,
-    "appName": "destination.codes"
+    "apis": {},
+    "appName": "fillmein.com"
 }

@@ -1,0 +1,25 @@
+{
+  "name": "universal-js-boilerplate",
+  "description": "This is a Node/Browserify/Babel/Backbone/React/etc boilerplate. To be used as an initial scaffolding tool.",
+  "main": "app.js",
+  "authors": [
+    "Matthew Keas (@matthiasak)"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/matthiasak/universal-js-boilerplate",
+  "moduleType": [
+    "es6"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "normalize-scss": "~3.0.3",
+    "PACE": "pace#~1.0.2",
+    "typeplate-starter-kit": "~2.1.0"
+  }
+}

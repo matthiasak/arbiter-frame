@@ -11,6 +11,5 @@
   },
   "_source": "git://github.com/typeplate/starter-kit.git",
   "_target": "~2.1.0",
-  "_originalSource": "typeplate-starter-kit",
-  "_direct": true
+  "_originalSource": "typeplate-starter-kit"
 }

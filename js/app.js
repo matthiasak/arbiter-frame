@@ -1,5 +1,5 @@
 // es5, 6, and 7 polyfills, powered by babel
-require("babel-polyfill")
+import polyfill from "babel-polyfill"
 
 // fetch method, returns es6 promises
 // if you uncomment 'universal-utils' below, you can comment out this line
@@ -20,18 +20,17 @@ if (module.hot) {
     })
 }
 
-var Babel = require('babel-core')
-var presets = [
-        require('babel-preset-es2015'),
-        require('babel-preset-stage-0'),
-        require('babel-preset-react')
-    ]
+const Babel = require ('babel-core')
+import a1 from 'babel-preset-es2015'
+import a2 from 'babel-preset-stage-0'
+import a3 from 'babel-preset-react'
+let presets = [a1,a2,a3]
 
 // import {container, resolver, m} from 'mithril-resolver'
-let codemirror = require('codemirror'),
-    jsmode = require('codemirror/mode/javascript/javascript'),
-    comment = require('codemirror/addon/comment/comment'),
-    sublime = require('codemirror/keymap/sublime')
+import codemirror from 'codemirror'
+import jsmode from 'codemirror/mode/javascript/javascript'
+import comment from 'codemirror/addon/comment/comment'
+import sublime from 'codemirror/keymap/sublime'
 
 String.prototype.hashCode = function() {
     var hash = 0, i, chr, len;
@@ -74,16 +73,19 @@ const directions = `/* (1) code your JS as normal.
  * - http://github.com/matthiasak
  * */`
 
- // Check for ServiceWorker support before trying to install it
+// Check for ServiceWorker support before trying to install it
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./serviceworker.js').then(() => {
-    // Registration was successful
-  }).catch(() => {
-    // Registration failed
-  });
+    navigator.serviceWorker.register('./serviceworker.js').then(() => {
+        // Registration was successful
+        console.info('registration success')
+    }).catch(() => {
+        console.error('registration failed')
+            // Registration failed
+    })
 } else {
-  // No ServiceWorker Support
+    // No ServiceWorker Support
 }
+
 
 let program = unescape(window.location.hash.slice(1)) || `${directions}
 
@@ -227,7 +229,7 @@ const assert = (...args) => window.parent.assert(...args)
 // https://wzrd.in/standalone/semver
 // https://npmcdn.com/semver
 
-const r = (semver, url='https://wzrd.in/standalone/') =>
+const __r = (semver, url='https://wzrd.in/standalone/') =>
     ((localStorage && (url+semver) in localStorage) ?
         new Promise((res,rej) => res(localStorage[url+semver])) :
         fetch(url+semver).then(x => x.text()).then(x => localStorage[url+semver] = x))
@@ -236,7 +238,7 @@ const r = (semver, url='https://wzrd.in/standalone/') =>
 
 const require = (...libs) =>
     Promise.all(libs.map(l =>
-        r(l)))
+        __r(l)))
 
 const clearAll = () =>
     Object.keys(localStorage).map(x =>
@@ -422,3 +424,4 @@ const app = () => {
 }
 
 app()
+

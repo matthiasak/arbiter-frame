@@ -1,11 +1,13 @@
-var express = require('express'),
-    app = express(),
-    request = require('request'),
-    compression = require('compression'),
-    session = require('express-session'),
-    bodyParser = require('body-parser'),
-    csrf = require('csurf'),
-    override = require('method-override')
+import express from 'express'
+import request from 'request'
+import compression from 'compression'
+import session from 'express-session'
+import bodyParser from 'body-parser'
+import csrf from 'csurf'
+import override from 'method-override'
+import {serverRender, apis} from '../config.json'
+
+let app = express()
 
 // all environments
 app.set('port', process.argv[3] || process.env.PORT || 3000)
@@ -17,7 +19,7 @@ app.use(
         filter: (req,res) => true,
         level: 9
     }),
-    express.static(__dirname+'/dist', {maxAge: 1000*60*60*12})
+    express.static(__dirname+'/../dist', {maxAge: 1000*60*60*12})
 )
 
 // { test: 'name', test2: 'name2' } --> '?test=name&test2=name2'
