@@ -6,7 +6,7 @@ var urlsToCache = [
     './style.css',
     './app.js',
     './polyfill.js',
-    // './serviceworker.js',
+    './babel-standalone.js',
     './worker.html'
 ]
 
