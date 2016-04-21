@@ -38,7 +38,7 @@
     "tag": "v1.0.2",
     "commit": "c6846cbf6b928e9903b569269fa9fbf32f2554f4"
   },
-  "_source": "git://github.com/HubSpot/pace.git",
+  "_source": "https://github.com/HubSpot/pace.git",
   "_target": "~1.0.2",
   "_originalSource": "pace"
 }

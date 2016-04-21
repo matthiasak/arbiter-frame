@@ -1,5 +1,5 @@
 var CACHE_NAME = 'arbiter'
-    // The files we want to cache
+// The files we want to cache
 var urlsToCache = [
     '/',
     './index.html',
@@ -12,21 +12,21 @@ var urlsToCache = [
 
 // Set the callback for the install step
 self.addEventListener('install', (event) => {
-    console.log('installing', event)
+    // console.log('installing', event)
     // Perform install steps
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) =>
-            console.log(cache) ||
+            // console.log(cache) ||
             cache.addAll(urlsToCache))
     )
 })
 
 // Set the callback when the files get fetched
 self.addEventListener('fetch', (event) => {
-    console.log(event.request, 'being requested')
+    // console.log(event.request, 'being requested')
     event.respondWith(
         caches.match(event.request).then((response) => {
-            console.log(response)
+            // console.log(response)
             // Cached files available, return those
             if (response) {
                 return response
@@ -66,15 +66,15 @@ self.addEventListener('fetch', (event) => {
     )
 })
 
-// self.addEventListener('activate', (event) => {
-//     console.log('activating', event)
-//     event.waitUntil(
-//         caches.keys().then((cacheNames) => {
-//             return Promise.all(
-//                 cacheNames.map((cacheName) =>
-//                     // cacheName !== CACHE_NAME &&
-//                     caches.delete(cacheName))
-//             )
-//         })
-//     )
-// })
+self.addEventListener('activate', (event) => {
+    // console.log('activating', event)
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) =>
+                    // cacheName !== CACHE_NAME &&
+                    caches.delete(cacheName))
+            )
+        })
+    )
+})

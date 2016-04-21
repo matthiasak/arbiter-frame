@@ -7,7 +7,25 @@ import polyfill from "babel-polyfill"
 
 // universal utils: cache, fetch, store, resource, fetcher, router, vdom, etc
 import * as u from 'universal-utils'
-const {mount, m, update, store, container, rAF, debounce, qs, router, fetch:_fetch, channel} = u
+const {vdom:{mount, m, update, qs, rAF, debounce, container}, store:{store}, router:{router}, fetch:{fetch:_fetch}, csp:{channel}} = u
+
+// Check for ServiceWorker support before trying to install it
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./serviceworker.js').then(() => {
+        // Registration was successful
+        console.info('registration success')
+    }).catch(() => {
+        console.error('registration failed')
+            // Registration failed
+    })
+
+    const unregister = () => navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {registration.unregister()}
+    })
+    window.unregister = unregister
+} else {
+    // No ServiceWorker Support
+}
 
 // the following line, if uncommented, will enable browserify to push
 // a changed file to you, with source maps (reverse map from compiled
@@ -20,11 +38,8 @@ if (module.hot) {
     })
 }
 
-const Babel = require ('babel-core')
-import a1 from 'babel-preset-es2015'
-import a2 from 'babel-preset-stage-0'
-import a3 from 'babel-preset-react'
-let presets = [a1,a2,a3]
+let Babel = window.Babel
+let presets = ['es2015', 'stage-0', 'react']
 
 // import {container, resolver, m} from 'mithril-resolver'
 import codemirror from 'codemirror'
@@ -72,20 +87,6 @@ const directions = `/* (1) code your JS as normal.
  * - http://mkeas.org
  * - http://github.com/matthiasak
  * */`
-
-// Check for ServiceWorker support before trying to install it
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./serviceworker.js').then(() => {
-        // Registration was successful
-        console.info('registration success')
-    }).catch(() => {
-        console.error('registration failed')
-            // Registration failed
-    })
-} else {
-    // No ServiceWorker Support
-}
-
 
 let program = unescape(window.location.hash.slice(1)) || `${directions}
 
@@ -224,7 +225,9 @@ const reset = () => window.parent.reset()
 
 const each = (c, fn) => c.forEach(fn)
 
-const assert = (...args) => window.parent.assert(...args)
+const assert = (test, message) => {
+    if(!test) throw new Error('An assertion failed' + (message ? ' - '+message : ''))
+}
 
 // https://wzrd.in/standalone/semver
 // https://npmcdn.com/semver
@@ -252,6 +255,7 @@ const log = (...args) => {
 }
 
 ${code}
+
 `
 
 const iframe_el = prop()
@@ -416,7 +420,6 @@ const Results = () => {
                 {readonly:true, value: getError() }),
             m(`textarea.logs${state.logs.length ? '.active' : ''}`,
                 {readonly:true, value: state.logs.join('\n') }))
-
 }
 
 const app = () => {
