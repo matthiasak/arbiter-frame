@@ -1,6 +1,6 @@
 {
   "name": "arbiter-frame",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "This is a Node/Browserify/Babel/Backbone/React/etc boilerplate. To be used as an initial scaffolding tool.",
   "author": "Matthew Keas <matthiasak@gmail.com>",
   "license": "MIT",
