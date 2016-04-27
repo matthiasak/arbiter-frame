@@ -6,6 +6,6 @@
     }],
     "test": {
         "type": "ava",
-        "source": "./js/test/"
+        "source": "./test/"
     }
 }

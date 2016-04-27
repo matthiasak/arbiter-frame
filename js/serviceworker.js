@@ -7,7 +7,8 @@ var urlsToCache = [
     './app.js',
     './polyfill.js',
     './babel-standalone.js',
-    './worker.html'
+    './worker.html',
+    './serviceworker.js'
 ]
 
 // Set the callback for the install step
@@ -66,15 +67,15 @@ self.addEventListener('fetch', (event) => {
     )
 })
 
-self.addEventListener('activate', (event) => {
-    // console.log('activating', event)
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) =>
-                    // cacheName !== CACHE_NAME &&
-                    caches.delete(cacheName))
-            )
-        })
-    )
-})
+// self.addEventListener('activate', (event) => {
+//     // console.log('activating', event)
+//     event.waitUntil(
+//         caches.keys().then((cacheNames) => {
+//             return Promise.all(
+//                 cacheNames.map((cacheName) =>
+//                     // cacheName !== CACHE_NAME &&
+//                     caches.delete(cacheName))
+//             )
+//         })
+//     )
+// })

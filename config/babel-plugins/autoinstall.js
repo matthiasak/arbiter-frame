@@ -1,7 +1,9 @@
 'use strict';
 
 const util = require('util');
-const execSync = require('child_process').execSync;
+const cp = require('child_process');
+const execSync = cp.execSync;
+const exec = cp.exec;
 
 const ignoreModules = [
     'react-heatpack-script-alias',
@@ -39,6 +41,8 @@ const getInstalledModules = () => {
 
 };
 
+let count = 0
+
 module.exports = function(options) {
     let installedModules = getInstalledModules();
 
@@ -48,10 +52,16 @@ module.exports = function(options) {
 
     const install = (module) => {
         console.log(`Found missing npm module: ${module}, installing`);
-        console.log(execSync(`npm install ${module}`).toString());
-        installedModules[module] = {
-            byUs: true
-        };
+        count++
+        exec(`npm install ${module}`, (err,stdout,stderr) => {
+            if(err || stderr) {
+                console.error(err || stderr)
+                return
+            }
+
+            count--
+            installedModules[module] = { byUs: true }
+        })
     };
 
     return {

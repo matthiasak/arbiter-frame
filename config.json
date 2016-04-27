@@ -1,5 +1,5 @@
 {
-    "serverRender": false,
-    "apis": {},
-    "appName": "fillmein.com"
+    "cluster": false,
+    "https": false,
+    "appName": "FILLMEIN"
 }

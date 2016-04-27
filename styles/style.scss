@@ -54,7 +54,7 @@
     @media only screen and (min-width: #{$width}px) {
         .grid-#{$col}-#{$width} {
             & > * {
-                flex-basis: #{100 / $col}%;
+                flex-basis: #{100 / $col}#{%};
             }
         }
     }
@@ -63,7 +63,7 @@
 @mixin grid($col) {
     .grid-#{$col} {
         & > * {
-            flex-basis: #{100 / $col}%;
+            flex-basis: #{100 / $col}#{%};
         }
     }
 }
