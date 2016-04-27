@@ -13,9 +13,9 @@ const {vdom:{mount, m, update, qs, rAF, debounce, container}, store:{store}, rou
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./serviceworker.js').then(() => {
         // Registration was successful
-        console.info('registration success')
-    }).catch(() => {
-        console.error('registration failed')
+        console.log('service worker registration success')
+    }).catch(e => {
+        console.log('sevice worker registration failed', e)
             // Registration failed
     })
 
