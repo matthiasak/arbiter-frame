@@ -1,14 +1,13 @@
 var CACHE_NAME = 'arbiter'
 // The files we want to cache
 var urlsToCache = [
-    '/',
     './index.html',
     './style.css',
     './app.js',
     './polyfill.js',
     './babel-standalone.js',
-    './worker.html',
-    './serviceworker.js'
+    './worker.html'
+    // './serviceworker.js'
 ]
 
 // Set the callback for the install step
