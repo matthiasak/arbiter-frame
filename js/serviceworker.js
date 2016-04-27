@@ -7,8 +7,8 @@ var urlsToCache = [
     './app.js',
     './polyfill.js',
     './babel-standalone.js',
-    './worker.html'
-    // './serviceworker.js'
+    './worker.html',
+    './serviceworker.js'
 ]
 
 // Set the callback for the install step
