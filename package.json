@@ -1,111 +1,111 @@
 {
-    "name": "arbiter-frame",
-    "version": "1.4.9",
-    "description": "This is a Node/Browserify/Babel/Backbone/React/etc boilerplate. To be used as an initial scaffolding tool.",
-    "author": "Matthew Keas <matthiasak@gmail.com>",
-    "license": "MIT",
-    "main": "app.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/matthiasak/arbiter-frame.git"
-    },
-    "browserify": {
-        "transforms": [
-            "envify"
-        ]
-    },
-    "babel": {
-        "env": {
-            "production": {
-                "presets": [
-                    "es2015",
-                    "stage-0",
-                    "react",
-                    "babel-preset-react-optimize"
-                ]
-            }
-        },
-        "plugins": [
-            "./config/babel-plugins/autoinstall.js"
-        ],
+  "name": "arbiter-frame",
+  "version": "1.4.10",
+  "description": "This is a Node/Browserify/Babel/Backbone/React/etc boilerplate. To be used as an initial scaffolding tool.",
+  "author": "Matthew Keas <matthiasak@gmail.com>",
+  "license": "MIT",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthiasak/arbiter-frame.git"
+  },
+  "browserify": {
+    "transforms": [
+      "envify"
+    ]
+  },
+  "babel": {
+    "env": {
+      "production": {
         "presets": [
-            "es2015",
-            "stage-0",
-            "react"
-        ],
-        "ignore": "node_modules"
+          "es2015",
+          "stage-0",
+          "react",
+          "babel-preset-react-optimize"
+        ]
+      }
     },
-    "engines": {
-        "node": ">=6 <7"
-    },
-    "config": {
-        "squash_reset": "HEAD~1",
-        "squash_msg": "'squashing commits down to 1 commit'"
-    },
-    "scripts": {
-        "js:app": "watchify -e build/app.js -v -d --delay 16 -o 'exorcist dist/app.js.map > dist/app.js'",
-        "js:serviceworker": "watchify -e build/serviceworker.js -v -d --delay 16 -o 'exorcist dist/serviceworker.js.map > dist/serviceworker.js'",
-        "js:polyfill": "watchify -e build/polyfill.js -v -d --delay 16 -o 'exorcist dist/polyfill.js.map > dist/polyfill.js'",
-        "js-once": "browserify -e build/app.js -v -d  | exorcist dist/app.js.map > dist/app.js; browserify -e build/serviceworker.js -v -d  | exorcist dist/serviceworker.js.map > dist/serviceworker.js; browserify -e build/polyfill.js -v -d  | exorcist dist/polyfill.js.map > dist/polyfill.js;",
-        "bower": "bower install --allow-root; cp ./node_modules/codemirror/lib/codemirror.css ./node_modules/codemirror/lib/codemirror.scss; cp ./node_modules/codemirror/addon/fold/foldgutter.css ./node_modules/codemirror/addon/fold/foldgutter.scss; cp ./node_modules/codemirror/theme/material.css ./node_modules/codemirror/theme/material.scss; echo 'bower dependencies installed';",
-        "css": "node-sass styles/style.scss | postcss --use autoprefixer --autoprefixer.browsers '> 50%' --use csswring -o ./dist/style.css",
-        "watch:js": "sane 'npm run restart' --wait=5 --glob='build/**/*.js'",
-        "watch:styles": "sane 'npm-run-all css' --glob='styles/**/*.scss' --glob='styles/**/*.css'",
-        "watch": "npm-run-all --parallel transpile js watch:styles",
-        "transpile": "babel js --watch --out-dir ./build",
-        "transpile-once": "babel js --out-dir ./build",
-        "js": "npm-run-all js:*",
-        "server": "node app.js",
-        "s": "npm-run-all --parallel watch server",
-        "start": "npm-run-all server",
-        "n": "npm-run-all --parallel watch:* server",
-        "top": "vtop",
-        "test": "ava test/main.js",
-        "prod": "NODE_ENV=production",
-        "postinstall": "npm-run-all prod bower transpile-once css js-once",
-        "docs": "esdoc -c esdoc.json",
-        "docs:surge": "npm-run-all docs; surge dist/esdoc;",
-        "publish:gh-pages": "git add . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all postinstall && git subtree split --prefix dist -b autobuilder && git checkout autobuilder && cp dist/app.js . && cp dist/style.css . && git add app.js style.css && git commit -am 'cleaning and pushing' && git push origin autobuilder:gh-pages --force; git checkout master; git branch -Dq autobuilder; echo 'done';",
-        "publish:surge": "npm-run-all build:*; rm -rf dist/esdoc; surge dist; echo 'done';",
-        "teardown": "surge list; echo 'type a domain from above: \n ------------ \n\n '; surge teardown",
-        "clean:subtrees": "git reflog expire --all --expire-unreachable=0; git repack -A -d; git prune; git gc;",
-        "check": "nsp check; echo 'check completed';",
-        "squash": "git reset $npm_package_config_squash_reset; git add .; git commit -am $npm_package_config_squash_msg; git push origin HEAD --force;",
-        "squash:reset": "npm run squash --squash_reset:universal-js-boilerplate=--",
-        "amend": "git commit --amend -m --",
-        "deploy": "git add .; git commit -am 'making updates'; npm version patch; git push origin master;"
-    },
-    "dependencies": {
-        "autoprefixer": "^6.3",
-        "babel-cli": "^6.5.1",
-        "babel-core": "^6.5.2",
-        "babel-polyfill": "^6.5.0",
-        "babel-preset-es2015": "^6.5.0",
-        "babel-preset-react": "^6.5.0",
-        "babel-preset-react-optimize": "^1.0.1",
-        "babel-preset-stage-0": "^6.5.0",
-        "bower": "^1.7",
-        "browserify": "^13.0",
-        "browserify-hmr": "^0.3.1",
-        "csswring": "^4.0",
-        "envify": "^3.4",
-        "exorcist": "^0.4",
-        "koa": "^2.0.0-alpha.3",
-        "koa-passport": "^2.0.1",
-        "koa-router": "^7",
-        "node-sass": "^3.4",
-        "npm-run-all": "^1.2",
-        "postcss-cli": "^2.5.1",
-        "sane": "^1.3",
-        "vtop": "^0.5",
-        "watchify": "^3.7",
-        "webworkify": "^1"
-    },
-    "devDependencies": {
-        "ava": ">=0.11",
-        "esdoc": "^0.4",
-        "esdoc-es7-plugin": ">=0.0",
-        "nsp": ">=2.0",
-        "surge": ">=0.17"
-    }
+    "plugins": [
+      "./config/babel-plugins/autoinstall.js"
+    ],
+    "presets": [
+      "es2015",
+      "stage-0",
+      "react"
+    ],
+    "ignore": "node_modules"
+  },
+  "engines": {
+    "node": ">=6 <7"
+  },
+  "config": {
+    "squash_reset": "HEAD~1",
+    "squash_msg": "'squashing commits down to 1 commit'"
+  },
+  "scripts": {
+    "js:app": "watchify -e build/app.js -v -d --delay 16 -o 'exorcist dist/app.js.map > dist/app.js'",
+    "js:serviceworker": "watchify -e build/serviceworker.js -v -d --delay 16 -o 'exorcist dist/serviceworker.js.map > dist/serviceworker.js'",
+    "js:polyfill": "watchify -e build/polyfill.js -v -d --delay 16 -o 'exorcist dist/polyfill.js.map > dist/polyfill.js'",
+    "js-once": "browserify -e build/app.js -v -d  | exorcist dist/app.js.map > dist/app.js; browserify -e build/serviceworker.js -v -d  | exorcist dist/serviceworker.js.map > dist/serviceworker.js; browserify -e build/polyfill.js -v -d  | exorcist dist/polyfill.js.map > dist/polyfill.js;",
+    "bower": "bower install --allow-root; cp ./node_modules/codemirror/lib/codemirror.css ./node_modules/codemirror/lib/codemirror.scss; cp ./node_modules/codemirror/addon/fold/foldgutter.css ./node_modules/codemirror/addon/fold/foldgutter.scss; cp ./node_modules/codemirror/theme/material.css ./node_modules/codemirror/theme/material.scss; echo 'bower dependencies installed';",
+    "css": "node-sass styles/style.scss | postcss --use autoprefixer --autoprefixer.browsers '> 50%' --use csswring -o ./dist/style.css",
+    "watch:js": "sane 'npm run restart' --wait=5 --glob='build/**/*.js'",
+    "watch:styles": "sane 'npm-run-all css' --glob='styles/**/*.scss' --glob='styles/**/*.css'",
+    "watch": "npm-run-all --parallel transpile js watch:styles",
+    "transpile": "babel js --watch --out-dir ./build",
+    "transpile-once": "babel js --out-dir ./build",
+    "js": "npm-run-all js:*",
+    "server": "node app.js",
+    "s": "npm-run-all --parallel watch server",
+    "start": "npm-run-all server",
+    "n": "npm-run-all --parallel watch:* server",
+    "top": "vtop",
+    "test": "ava test/main.js",
+    "prod": "NODE_ENV=production",
+    "postinstall": "npm-run-all prod bower transpile-once css js-once",
+    "docs": "esdoc -c esdoc.json",
+    "docs:surge": "npm-run-all docs; surge dist/esdoc;",
+    "publish:gh-pages": "git add . && git commit -am 'cleaning up any staged and uncomitted changes'; git checkout master; npm-run-all postinstall && git subtree split --prefix dist -b autobuilder && git checkout autobuilder && cp dist/app.js . && cp dist/style.css . && git add app.js style.css && git commit -am 'cleaning and pushing' && git push origin autobuilder:gh-pages --force; git checkout master; git branch -Dq autobuilder; echo 'done';",
+    "publish:surge": "npm-run-all build:*; rm -rf dist/esdoc; surge dist; echo 'done';",
+    "teardown": "surge list; echo 'type a domain from above: \n ------------ \n\n '; surge teardown",
+    "clean:subtrees": "git reflog expire --all --expire-unreachable=0; git repack -A -d; git prune; git gc;",
+    "check": "nsp check; echo 'check completed';",
+    "squash": "git reset $npm_package_config_squash_reset; git add .; git commit -am $npm_package_config_squash_msg; git push origin HEAD --force;",
+    "squash:reset": "npm run squash --squash_reset:universal-js-boilerplate=--",
+    "amend": "git commit --amend -m --",
+    "deploy": "git add .; git commit -am 'making updates'; npm version patch; git push origin master;"
+  },
+  "dependencies": {
+    "autoprefixer": "^6.3",
+    "babel-cli": "^6.5.1",
+    "babel-core": "^6.5.2",
+    "babel-polyfill": "^6.5.0",
+    "babel-preset-es2015": "^6.5.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-react-optimize": "^1.0.1",
+    "babel-preset-stage-0": "^6.5.0",
+    "bower": "^1.7",
+    "browserify": "^13.0",
+    "browserify-hmr": "^0.3.1",
+    "csswring": "^4.0",
+    "envify": "^3.4",
+    "exorcist": "^0.4",
+    "koa": "^2.0.0-alpha.3",
+    "koa-passport": "^2.0.1",
+    "koa-router": "^7",
+    "node-sass": "^3.4",
+    "npm-run-all": "^1.2",
+    "postcss-cli": "^2.5.1",
+    "sane": "^1.3",
+    "vtop": "^0.5",
+    "watchify": "^3.7",
+    "webworkify": "^1"
+  },
+  "devDependencies": {
+    "ava": ">=0.11",
+    "esdoc": "^0.4",
+    "esdoc-es7-plugin": ">=0.0",
+    "nsp": ">=2.0",
+    "surge": ">=0.17"
+  }
 }
