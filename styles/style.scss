@@ -1,8 +1,8 @@
-@import "../bower_components/normalize-scss/_normalize.scss";
-@import "../bower_components/typeplate-starter-kit/scss/_typeplate.scss";
-@import "../node_modules/codemirror/lib/codemirror.scss";
-@import "../node_modules/codemirror/addon/fold/foldgutter.scss";
-@import "../node_modules/codemirror/theme/material.scss";
+@import "../bower_components/normalize-scss/normalize.css";
+/* @import "../bower_components/typeplate-starter-kit/css/typeplate.css"; */
+@import "../node_modules/codemirror/lib/codemirror.css";
+@import "../node_modules/codemirror/addon/fold/foldgutter.css";
+@import "../node_modules/codemirror/theme/material.css";
 
 /* latin-ext */
 @font-face {
@@ -29,9 +29,9 @@
 *:before,
 *:after {
     box-sizing: border-box;
-    transition-duration: .25s;
-    transition-timing-function: ease;
-    transition-property: opacity, transform, background-color;
+    // transition-duration: .25s;
+    // transition-timing-function: ease;
+    // transition-property: opacity, transform, background-color;
 }
 
 /**
@@ -50,37 +50,38 @@
     }
 }
 
-@mixin grid_r($col, $width) {
-    @media only screen and (min-width: #{$width}px) {
-        .grid-#{$col}-#{$width} {
+@define-mixin grid_r $col, $width {
+    @media only screen and (min-width: $(width)px) {
+        .grid-$(col)-$(width) {
             & > * {
-                flex-basis: #{100 / $col}#{%};
+                flex-basis: calc(100 / $col)%;
             }
         }
     }
 }
 
-@mixin grid($col) {
-    .grid-#{$col} {
+@define-mixin grid $col {
+    .grid-$(col) {
         & > * {
-            flex-basis: #{100 / $col}#{%};
+            flex-basis: calc(100 / $col)%;
         }
     }
 }
 
-@include grid(2);
-@include grid(4);
-@include grid(6);
+@mixin grid 2;
+@mixin grid 4;
+@mixin grid 6;
 
-@include grid_r(2, 400);
-@include grid_r(2, 800);
+@mixin grid_r 2, 400;
+@mixin grid_r 2, 800;
 
-@include grid_r(4, 400);
-@include grid_r(4, 800);
+@mixin grid_r 4, 400;
+@mixin grid_r 4, 800;
 
 img {
     max-width: 100%;
 }
+
 /**
  * YOUR CODE HERE
  */

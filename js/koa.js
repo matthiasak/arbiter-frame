@@ -1,38 +1,53 @@
 import polyfill from "babel-polyfill"
-
 const cluster = require('cluster')
 import _router from 'koa-router'
 const router = _router()
-
 // middleware
-import stat from 'koa-serve-static'
+import send from 'koa-send'
 import conditional from 'koa-conditional-get'
 import bodyParser from 'koa-bodyparser'
-import Compress from 'koa-compress'
-import Morgan from 'koa-morgan'
+import compress from 'koa-compress'
+import morgan from 'koa-morgan'
 import favicon from 'koa-favicon'
 import session from 'koa-session'
-
 // adapt pre Koa 2.0 middle ware to be compatible with Koa 2.0.
 import adapt from 'koa-convert'
 import etag from 'koa-etag'
-import Koa from 'koa'
+import koa from 'koa'
 import request from 'request'
 import passport from 'koa-passport'
-export const app = new Koa()
+export const app = new koa()
+const logger = morgan('combined')
+import enforceHttps from 'koa-sslify'
+const config = require('../config.json')
 
-const logger = Morgan('combined')
-import rt from 'koa-response-time'
+if(config.https){
+    if(config.heroku){
+        app.use(enforceHttps({
+            trustProtoHeader: true
+        }))
+    } else {
+        app.use(enforceHttps())
+    }
+}
 
-//-- app.use(adapt(favicon(require.resolve('./dist/favicon.ico'))))
-app.use(adapt(rt()))
-app.use(adapt(conditional()))
-app.use(adapt(etag()))
-app.use(logger)
-app.use(adapt(Compress({ flush: require('zlib').Z_SYNC_FLUSH })))
-app.keys = [ Array(4).fill(true).map(x => Math.random()+'').join('') ]
-app.use(adapt(session({ maxAge: 24 * 60 * 60 * 1000 }, app)))
-app.use(adapt(bodyParser()))
+// app.use(favicon(__dirname+'../dist/icon.ico'))
+// app.use(rt())
+// app.use(logger)
+app.use(compress({
+    filter: () => true,
+    flush: require('zlib').Z_SYNC_FLUSH
+}))
+app.use(async (ctx,next) => {
+    await next()
+    await send(ctx, ctx.path, { root: __dirname + '/../dist' })
+})
+// app.use(conditional())
+// app.use(etag())
+// app.keys = [ Array(4).fill(true).map(x => Math.random()+'').join('') ]
+// app.use(adapt(session({ maxAge: 24 * 60 * 60 * 1000 }, app)))
+// app.use(bodyParser())
+
 
 /*
 Turn on passport (authenticate your users through twitter, etc)
@@ -77,13 +92,19 @@ Routes go here
 */
 
 // default proxying
-const replaceRemoteTokens = (req, webUrl, tokens=webUrl.match(/:(\w+)/ig)) =>
+const replaceRemoteTokens = (ctx, webUrl, tokens=webUrl.match(/:(\w+)/ig)) =>
     (tokens || []).reduce((a, t) =>
-        a.replace(new RegExp(t, 'ig'), req.params[t.substr(1)]), webUrl)
+        a.replace(new RegExp(t, 'ig'), ctx.params[t.substr(1)]), webUrl)
 
-const get = url =>
+const get = (url, headers={}) =>
     new Promise((res,rej) => {
-        request(url, (error, response, body) => {
+        request({
+            url,
+            headers: {
+                'User-Agent': 'request',
+                ...headers
+            }
+        }, (error, response, body) => {
             if(!error) { // && response.statusCode === 200
                 return res(body)
             }
@@ -91,10 +112,10 @@ const get = url =>
         })
     })
 
-const proxify = (router, localUrl, webUrl) => {
+const proxify = (router, localUrl, webUrl, headers) => {
     router.get(localUrl, async (ctx, next) => {
         try {
-            var data = await get(replaceRemoteTokens(ctx.req, webUrl) + (ctx.req._parsedUrl.search || ''))
+            var data = await get(replaceRemoteTokens(ctx, webUrl) + (ctx.req._parsedUrl.search || ''), headers)
         } catch(e) {
             ctx.body = e
             return
@@ -113,96 +134,10 @@ const proxify = (router, localUrl, webUrl) => {
 // examples:
 // proxify(router, '/yummly/recipes', 'http://api.yummly.com/v1/api/recipes')
 // proxify(router, '/brewery/styles', 'https://api.brewerydb.com/v2/styles')
+// proxify(router, '/macrofab/:r1/:r2/:r3', 'https://demo.development.macrofab.com/api/v2/:r1/:r2/:r3', {Accept: 'application/json'})
 
-const guid = (function() {
-    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
-    return () => s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
-})()
-
-const enableREST = (router) => {
-    let collections = {}
-    router.get('/collections/:collectionName', async (ctx, next) => {
-        if (!collections[ctx.params.collectionName]) {
-            ctx.body = []
-        } else {
-            ctx.body = collections[ctx.params.collectionName]
-        }
-    })
-
-    router.post('/collections/:collectionName', async (ctx, next) => {
-        var collection = collections[ctx.params.collectionName]
-        if (!collection) {
-            collection = collections[ctx.params.collectionName] = []
-        }
-
-        var result = ctx.request.body
-        if (!result) {
-            ctx.statusCode = 404
-            return
-        }
-
-        if (result instanceof Array) {
-            result.forEach(function(d) {
-                d.id = guid()
-                collections[ctx.params.collectionName].push(d)
-            })
-            ctx.body = result
-        } else {
-            result.id = guid()
-            collections[ctx.params.collectionName].push(result)
-            ctx.body = result
-        }
-    })
-
-    router.get('/collections/:collectionName/:id', async (ctx, next) => {
-        if (!collections[ctx.params.collectionName]) {
-            ctx.statusCode = 401
-            return
-        }
-        let result = collections[ctx.params.collectionName].filter(i => i.id === ctx.params.id)
-        if (!result || !result.length) {
-            ctx.body = "collection " + ctx.params.collectionName + " does not have an item with id " + ctx.params.id
-            ctx.statusCode = 401
-            return
-        }
-        ctx.body = result[0]
-    })
-
-    router.put('/collections/:collectionName/:id', function(ctx, next) {
-        if (!collections[ctx.params.collectionName]) {
-            ctx.statusCode = 401
-            ctx.body = "collection " + ctx.params.collectionName + " does not exist."
-            return
-        }
-        var result = collections[ctx.params.collectionName].filter(i => i.id === ctx.params.id)
-        if (!result || !result.length) {
-            ctx.statusCode = 401
-            return
-        }
-
-        result[0] = {...result[0], ...ctx.request.body}
-
-        ctx.body = result[0]
-    })
-
-    // DELETE /collections/:collectionName
-    router.delete('/collections/:collectionName/:id', function(ctx, next) {
-        if (!collections[ctx.params.collectionName]) {
-            ctx.statusCode = 401
-            return
-        }
-
-        if (!ctx.params.id && collections[ctx.params.collectionName].length) {
-            ctx.statusCode = 401
-            return
-        }
-
-        collections[ctx.params.collectionName] = collections[ctx.params.collectionName].filter(i => i.id !== ctx.params.id)
-        ctx.body = {msg: 'success'}
-    })
-}
-
-// uncomment the line below to enable an in-memory RESTful endpoint
+// uncomment the lines below to enable an in-memory RESTful endpoint
+// import enableREST from './enableREST'
 // enableREST(router)
 
 // example routes
@@ -219,4 +154,3 @@ const enableREST = (router) => {
 
 app.use(router.routes())
 app.use(router.allowedMethods())
-app.use(stat('dist'))
