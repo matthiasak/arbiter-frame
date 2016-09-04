@@ -230,7 +230,7 @@ const assert = (test, message) => {
 }
 
 // https://wzrd.in/standalone/semver
-// https://npmcdn.com/semver
+// https://unpkg.com/semver
 
 const __r = (semver, url='https://wzrd.in/standalone/') =>
     ((localStorage && (url+semver) in localStorage) ?
