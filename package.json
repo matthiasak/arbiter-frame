@@ -133,7 +133,7 @@
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
     "request": "^2.74.0",
-    "sane": "^1.4.0",
+    "sane": "^2.5.0",
     "spdy": "^3.3.4",
     "uglifyjs": "^2.4.10",
     "universal-utils": "^1.0.37",
