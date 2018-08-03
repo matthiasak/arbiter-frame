@@ -131,7 +131,7 @@
     "postcss-style-guide": "^0.13.0",
     "precss": "1.x",
     "react": "^15.3.0",
-    "react-dom": "^15.3.0",
+    "react-dom": "^16.0.1",
     "request": "^2.74.0",
     "sane": "^1.4.0",
     "spdy": "^3.3.4",
