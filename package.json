@@ -139,7 +139,7 @@
     "universal-utils": "^1.0.37",
     "universal-utils-vdom-components": "0.x",
     "vtop": "0.x",
-    "watchify": "3.7",
+    "watchify": "3.11.1",
     "webworkify": "^1.3.0"
   },
   "devDependencies": {
