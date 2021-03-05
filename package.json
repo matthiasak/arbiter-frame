@@ -105,7 +105,7 @@
     "codemirror": "^5.17.0",
     "csswring": "^5.1.0",
     "envify": "^3.4.1",
-    "exorcist": "0.x",
+    "exorcist": "2.0.0",
     "forever": "0.x",
     "isomorphic-fetch": "2.x",
     "koa": "2.x",
