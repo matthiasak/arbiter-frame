@@ -106,7 +106,7 @@
     "csswring": "^5.1.0",
     "envify": "^3.4.1",
     "exorcist": "0.x",
-    "forever": "0.x",
+    "forever": "4.0.3",
     "isomorphic-fetch": "2.x",
     "koa": "2.x",
     "koa-bodyparser": "^3.2.0",
