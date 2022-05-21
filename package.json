@@ -91,7 +91,7 @@
     "compose:down": "docker-compose down"
   },
   "dependencies": {
-    "autoprefixer": "^6.4.0",
+    "autoprefixer": "^9.0.0",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.11.4",
     "babel-polyfill": "6.x",
