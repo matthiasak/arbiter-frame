@@ -116,7 +116,7 @@
     "koa-etag": "3.x",
     "koa-favicon": "2.x",
     "koa-morgan": "1.x",
-    "koa-passport": "^2.2.2",
+    "koa-passport": "^5.0.0",
     "koa-response-time": "2.x",
     "koa-router": "7.x",
     "koa-send": "^3.2.0",
