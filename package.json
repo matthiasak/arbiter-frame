@@ -118,7 +118,7 @@
     "koa-morgan": "1.x",
     "koa-passport": "^2.2.2",
     "koa-response-time": "2.x",
-    "koa-router": "7.x",
+    "koa-router": "13.0.1",
     "koa-send": "^3.2.0",
     "koa-session": "3.x",
     "koa-sslify": "1.x",
